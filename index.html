@@ -114,6 +114,7 @@ td .amt{text-align:right;font-weight:700;font-size:20px;padding-right:10px;white
 .kpi small{display:block;color:#78716c;font-size:13px;font-weight:600}
 .kpi b{display:block;font-size:26px;font-weight:800;margin-top:2px}
 .kpi.g b{color:#15803d}.kpi.r b{color:#b45309}
+.kpi b.up{color:#15803d}.kpi b.dn{color:#b91c1c}
 .chart{display:flex;align-items:flex-end;gap:8px;height:210px;border-bottom:1px solid #d6d3d1;padding:6px 4px 0;margin-bottom:6px}
 .col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;cursor:pointer;font-size:12px;color:#57534e;min-width:0}
 .col .stk{width:100%;display:flex;flex-direction:column;justify-content:flex-end;border-radius:4px 4px 0 0;overflow:hidden}
@@ -263,6 +264,7 @@ body:not(.report-mode) .rpt-only{display:none!important}
           <div class="kpi g"><small>បានទទួលប្រាក់ (Paid)</small><b id="k-paid">$0.00</b></div>
           <div class="kpi r"><small>មិនទាន់ទូទាត់ (Unpaid)</small><b id="k-unpaid">$0.00</b></div>
           <div class="kpi"><small>ចំនួនវិក្កយបត្រ</small><b id="k-count">0</b></div>
+          <div class="kpi"><small id="k-cmp-l">ធៀបខែមុន</small><b id="k-cmp">—</b><small id="k-cmp-s" style="margin-top:2px;font-weight:500"></small></div>
         </div>
         <div class="chart" id="r-chart"></div>
         <div class="labs" id="r-labs"></div>
@@ -705,6 +707,21 @@ function renderReport() {
   $('#r-title').textContent = 'របាយការណ៍ចំណូលខែ ' + MONTHS[m - 1] + ' ' + y;
   $('#k-inv').textContent = usd(all); $('#k-paid').textContent = usd(paid); $('#k-unpaid').textContent = usd(all - paid);
   $('#k-count').textContent = rows.length + ' (' + rows.filter(i => i.paid).length + ' paid)';
+  // month-over-month (invoiced total vs previous month)
+  const py = m === 1 ? y - 1 : y, pm = m === 1 ? 12 : m - 1;
+  const prev = rpt.list.filter(i => inMonth(i, py, pm)).reduce((a, i) => a + i.total, 0);
+  const cb = $('#k-cmp');
+  $('#k-cmp-l').textContent = 'ធៀបខែ' + MONTHS[pm - 1];
+  cb.className = '';
+  if (prev > 0) {
+    const pct = (all - prev) / prev * 100;
+    cb.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
+    cb.className = pct >= 0 ? 'up' : 'dn';
+    $('#k-cmp-s').textContent = usd(prev) + ' → ' + usd(all);
+  } else {
+    cb.textContent = '—';
+    $('#k-cmp-s').textContent = 'គ្មានទិន្នន័យខែមុន';
+  }
   $('#r-body').innerHTML = rows.length ? rows.map(i =>
     '<tr><td>' + esc(i.date) + '</td><td>' + esc(i.name) + '</td><td>' + esc(i.subjects) + '</td><td class="n">' + usd(i.total) + '</td>' +
     '<td><span class="chip ' + (i.paid ? 'p' : 'u') + '">' + (i.paid ? 'Paid' + (i.paidDate ? ' · ' + esc(i.paidDate) : '') : 'Unpaid') + '</span></td>' +
