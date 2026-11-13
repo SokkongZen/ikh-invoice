@@ -531,7 +531,8 @@ $('#b-img').addEventListener('click', async () => {
       // Khmer marks (above/below the base letter) get clipped inside <input>; draw plain text blocks instead
       onclone: (doc) => {
         const st = doc.createElement('style');
-        st.textContent = '#invoice, #invoice *{line-height:1.9!important;letter-spacing:normal!important}' +
+        st.textContent = '#invoice *{letter-spacing:normal!important}' +
+          '#invoice .box,#invoice td .amt{line-height:1.9!important}' +
           '#invoice td,#invoice .box,#invoice .stu{overflow:visible!important}';
         doc.head.appendChild(st);
         doc.querySelectorAll('#invoice input').forEach(inp => {
@@ -541,10 +542,13 @@ $('#b-img').addEventListener('click', async () => {
           d.textContent = inp.value !== '' ? inp.value : '\u00a0';
           d.style.cssText = 'font-family:' + cs.fontFamily + ';font-size:' + cs.fontSize + ';font-weight:' + cs.fontWeight +
             ';color:' + cs.color + ';text-align:' + cs.textAlign + ';width:' + (inp.id === 'f-num' ? 'auto' : '100%') +
-            ';padding:' + cs.padding + ';white-space:pre-wrap;word-break:break-word;overflow:visible;min-width:0';
+            ';padding:' + cs.padding + ';white-space:pre-wrap;word-break:break-word;overflow:visible;min-width:0;line-height:' + (inp.closest('.meta') ? cs.lineHeight : '1.9');
           if (inp.classList.contains('field') && !inp.closest('.stu') && !inp.closest('td')) d.style.width = cs.width;
           inp.replaceWith(d);
         });
+        // keep logo height equal to the right column in the captured copy too
+        const lg = doc.querySelector('.seller .logo'), rt = doc.querySelector('.head .right');
+        if (lg && rt) { lg.style.height = rt.offsetHeight + 'px'; }
       }
     });
     const a = document.createElement('a');
