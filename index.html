@@ -520,7 +520,27 @@ $('#b-img').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = 'Generating...';
   try {
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
-    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, windowWidth: 1400 });
+    const canvas = await html2canvas(el, {
+      scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, windowWidth: 1400,
+      // Khmer marks (above/below the base letter) get clipped inside <input>; draw plain text blocks instead
+      onclone: (doc) => {
+        const st = doc.createElement('style');
+        st.textContent = '#invoice, #invoice *{line-height:1.9!important;letter-spacing:normal!important}' +
+          '#invoice td,#invoice .box,#invoice .stu{overflow:visible!important}';
+        doc.head.appendChild(st);
+        doc.querySelectorAll('#invoice input').forEach(inp => {
+          if (inp.classList.contains('dp') || inp.closest('[data-html2canvas-ignore]')) return;
+          const cs = doc.defaultView.getComputedStyle(inp);
+          const d = doc.createElement('div');
+          d.textContent = inp.value !== '' ? inp.value : '\u00a0';
+          d.style.cssText = 'font-family:' + cs.fontFamily + ';font-size:' + cs.fontSize + ';font-weight:' + cs.fontWeight +
+            ';color:' + cs.color + ';text-align:' + cs.textAlign + ';width:' + (inp.id === 'f-num' ? 'auto' : '100%') +
+            ';padding:' + cs.padding + ';white-space:pre-wrap;word-break:break-word;overflow:visible;min-width:0';
+          if (inp.classList.contains('field') && !inp.closest('.stu') && !inp.closest('td')) d.style.width = cs.width;
+          inp.replaceWith(d);
+        });
+      }
+    });
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/jpeg', 0.92);
     a.download = (state.name.trim() || 'Unknown_Student') + '-' + state.number + '.jpg';
