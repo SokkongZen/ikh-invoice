@@ -1,4 +1,4 @@
-// ===== ikh-DB : EDU-ikh Invoice Backend (v3: report + Mark Paid + password/token) =====
+// ===== ikh-DB : EDU-ikh Invoice Backend (v4: report + Mark Paid + password/token + lessons & homework) =====
 // SETUP: Project Settings -> Script Properties -> add  ADMIN_PASSWORD = <your password>
 // Every request must carry a valid token (obtained from ?action=login&pw=...).
 // Columns: A Date | B Invoice No | C Saved At | D Student | E Phone | F Location
@@ -96,12 +96,103 @@ function login_(e) {
   return { ok: false, error: 'wrong' };
 }
 
+
+// ---------- LESSONS & HOMEWORK (separate tabs, created automatically) ----------
+var LESSON_HEADERS = ['ID','Date','Student','Grade','Subject','Topic','Hours','Errors','Saved At'];
+var HW_HEADERS = ['ID','Assigned','Student','Subject','Topic','Due','Status','Sent Date'];
+
+function tab_(name, headers) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(name);
+  if (!sh) {
+    sh = ss.insertSheet(name);
+    sh.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold').setBackground('#e7e5e4');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function s_(v, max) { return String(v == null ? '' : v).replace(/[\r\n]+/g, ' ').trim().slice(0, max || 200); }
+
+function findRowById_(sh, id) {
+  var last = sh.getLastRow();
+  if (last < 2 || !id) return 0;
+  var ids = sh.getRange(2, 1, last - 1, 1).getDisplayValues();
+  for (var i = 0; i < ids.length; i++) if (String(ids[i][0]) === String(id)) return 2 + i;
+  return 0;
+}
+
+function listLessons_() {
+  var ls = tab_('Lessons', LESSON_HEADERS), hs = tab_('Homework', HW_HEADERS);
+  var lessons = [], homework = [];
+  var ll = ls.getLastRow();
+  if (ll >= 2) {
+    var start = Math.max(2, ll - 399);
+    ls.getRange(start, 1, ll - start + 1, LESSON_HEADERS.length).getDisplayValues().forEach(function (r, i) {
+      if (!r[0]) return;
+      lessons.push({ row: start + i, id: r[0], date: r[1], student: r[2], grade: r[3], subject: r[4], topic: r[5],
+        hours: num_(r[6]), errors: r[7] ? String(r[7]).split(' | ') : [] });
+    });
+  }
+  var hl = hs.getLastRow();
+  if (hl >= 2) {
+    var hstart = Math.max(2, hl - 599);
+    hs.getRange(hstart, 1, hl - hstart + 1, HW_HEADERS.length).getDisplayValues().forEach(function (r, i) {
+      if (!r[0]) return;
+      homework.push({ row: hstart + i, id: r[0], assigned: r[1], student: r[2], subject: r[3], topic: r[4], due: r[5],
+        sent: String(r[6]).toLowerCase() === 'sent', sentDate: r[7] });
+    });
+  }
+  return { lessons: lessons, homework: homework };
+}
+
+function saveLesson_(p) {
+  var L = p.lesson || {}, H = p.homework || null;
+  if (!L.id || !s_(L.student) || !s_(L.topic)) throw new Error('lesson needs id, student and topic');
+  var ls = tab_('Lessons', LESSON_HEADERS);
+  var errors = (L.errors || []).map(function (x) { return s_(x, 60); }).filter(String).join(' | ');
+  var lrow = [s_(L.id, 60), s_(L.date, 20), s_(L.student, 80), s_(L.grade, 4), s_(L.subject, 40), s_(L.topic, 200),
+              Number(L.hours) || 0, errors, Utilities.formatDate(new Date(), TZ, 'dd-MM-yyyy HH:mm:ss')];
+  var lt = findRowById_(ls, lrow[0]) || Math.max(ls.getLastRow() + 1, 2);
+  ls.getRange(lt, 1, 1, 6).setNumberFormat('@');
+  ls.getRange(lt, 8, 1, 2).setNumberFormat('@');
+  ls.getRange(lt, 1, 1, lrow.length).setValues([lrow]);
+
+  var hrowNo = 0;
+  if (H && H.id && s_(H.student)) {
+    var hs = tab_('Homework', HW_HEADERS);
+    var hrow = [s_(H.id, 60), s_(H.assigned, 20), s_(H.student, 80), s_(H.subject, 40), s_(H.topic, 200), s_(H.due, 20), 'Pending', ''];
+    hrowNo = findRowById_(hs, hrow[0]);
+    if (hrowNo) {   // re-save: keep the current status
+      hrow[6] = String(hs.getRange(hrowNo, 7).getDisplayValue() || 'Pending');
+      hrow[7] = String(hs.getRange(hrowNo, 8).getDisplayValue() || '');
+    } else hrowNo = Math.max(hs.getLastRow() + 1, 2);
+    hs.getRange(hrowNo, 1, 1, hrow.length).setNumberFormat('@');
+    hs.getRange(hrowNo, 1, 1, hrow.length).setValues([hrow]);
+  }
+  return json_({ ok: true, lessonRow: lt, homeworkRow: hrowNo });
+}
+
+// {id, sent: true|false}
+function homeworkStatus_(p) {
+  var hs = tab_('Homework', HW_HEADERS);
+  var row = findRowById_(hs, p.id);
+  if (!row) return json_({ ok: false, error: 'homework not found' });
+  var sent = p.sent !== false;
+  var today = Utilities.formatDate(new Date(), TZ, 'dd-MM-yyyy');
+  var rng = hs.getRange(row, 7, 1, 2);
+  rng.setNumberFormat('@');
+  rng.setValues([[sent ? 'Sent' : 'Pending', sent ? today : '']]);
+  return json_({ ok: true });
+}
+
 // ---------- GET ----------
 function doGet(e) {
   try {
     var action = e && e.parameter && e.parameter.action;
     if (action === 'login') return output_(login_(e), e);
     if (!validToken_(e && e.parameter && e.parameter.token)) return output_({ error: 'unauthorized' }, e);
+    if (action === 'lessons') return output_(listLessons_(), e);
     var sheet = getSheet_();
     var data = readRows_(sheet);
 
@@ -154,6 +245,8 @@ function doPost(e) {
     lock.waitLock(20000);
     var p = JSON.parse(e.postData.contents);
     if (!validToken_(p.token)) return json_({ ok: false, error: 'unauthorized' });
+    if (p.action === 'saveLesson') return saveLesson_(p);
+    if (p.action === 'homeworkStatus') return homeworkStatus_(p);
     var sheet = getSheet_();
     if (p.action === 'markPaid') return markPaid_(sheet, p);
     return saveInvoice_(sheet, p);
