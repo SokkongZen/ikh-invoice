@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Battambang:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;font-family:'Inter','Battambang',sans-serif;color:#292524;background:#e7e5e1}
+html,body{margin:0;font-family:'Inter','Battambang',sans-serif;color:#292524;background:#e7e5e1;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 input,textarea,button{font-family:inherit}
 .hidden{display:none!important}
 .grid-bg{min-height:100vh;background-color:#e7e5e1;background-size:40px 40px;background-image:linear-gradient(to right,rgba(0,0,0,.02) 1px,transparent 1px),linear-gradient(to bottom,rgba(0,0,0,.02) 1px,transparent 1px);animation:moveGrid 30s linear infinite;position:relative}
@@ -21,7 +21,7 @@ input,textarea,button{font-family:inherit}
 
 /* login */
 #login{display:flex;align-items:center;justify-content:center;padding:16px}
-.glass{background:rgba(255,255,255,.5);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(0,0,0,.05);border-radius:16px;padding:40px;width:100%;max-width:420px;position:relative;z-index:1}
+.glass{background:rgba(255,255,255,.5);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(0,0,0,.05);border-radius:16px;padding:40px;width:100%;max-width:420px;position:relative;z-index:1}
 .glass h2{margin:0 0 4px;text-align:center;font-size:28px;font-weight:800}
 .glass .sub{margin:0 0 24px;text-align:center;color:#78716c;font-size:14px}
 .glass label{display:block;font-size:14px;font-weight:500;color:#57534e;margin-bottom:4px}
@@ -137,7 +137,78 @@ td .amt{text-align:right;font-weight:700;font-size:20px;padding-right:10px;white
 .empty{padding:28px;text-align:center;color:#78716c}
 body.report-mode .inv-only{display:none!important}
 body:not(.report-mode) .rpt-only{display:none!important}
-@media(max-width:760px){.head,.foot{flex-direction:column;grid-template-columns:1fr}#invoice{padding:16px}.tbox{width:100%}}
+.labs .ls{display:none}
+@media screen and (max-width:760px){
+  #app{padding:8px}
+  .glass{padding:28px 20px}.glass h2{font-size:24px}
+  .toolbar{padding:10px;gap:8px;margin-bottom:12px}
+  .toolbar h1{font-size:16px;width:100%}
+  .btns{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .btn{justify-content:center;min-height:44px;padding:8px 10px;font-size:14px}
+  #toast{width:92vw;max-width:92vw;text-align:center;font-size:14px;padding:12px 14px}
+
+  #invoice{padding:14px;min-height:0}
+  #invoice h2.title{font-size:28px;text-align:left;margin-bottom:8px}
+  .head{flex-direction:column;align-items:stretch;gap:14px;padding-bottom:16px;margin-bottom:18px}
+  .seller{justify-content:center}
+  .seller .logo{height:110px!important}
+  .meta{padding:12px}
+  .row{flex-direction:column;align-items:stretch;gap:0;margin-bottom:10px}
+  .row .k{font-size:12px}
+  .field{width:100%!important;text-align:left;font-size:17px}
+  .dwrap{flex:1;min-width:0}.dwrap .field{width:100%!important;min-width:0}
+  .stu{padding:12px;margin-bottom:18px}
+  .stu .field{font-size:20px;padding:10px 6px}
+
+  .tw{border:none;overflow:visible}
+  .tw table,.tw tbody,.tw tr,.tw td{display:block;width:100%}
+  .tw thead{display:none}
+  .tw tr,tbody tr:nth-child(even){background:#fff}
+  .tw tr{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;border:1px solid #e7e5e4;border-radius:8px;padding:10px;margin-bottom:10px}
+  .tw td{border:none;padding:0!important;min-width:0}
+  .tw td::before{content:attr(data-label);display:block;font-size:11px;color:#78716c;font-weight:600;text-transform:uppercase;padding:0 2px 2px}
+  .tw td:nth-child(1),.tw td:nth-child(6){grid-column:1/-1}
+  .tw td:nth-child(7){position:absolute;top:2px;right:2px;width:auto}
+  .tw td:nth-child(7)::before{display:none}
+  .tw td:nth-child(1) input{padding-right:40px}
+  .tw td input{border:1px solid #e7e5e4;border-radius:6px;background:#fafaf9;padding:10px;min-height:44px}
+  td .amt{padding-right:2px;font-size:22px}
+  .del{padding:10px;font-size:18px}
+  .add{width:100%;min-height:44px}
+
+  .totals{margin-top:18px}
+  .tbox{width:100%;min-width:0;padding:20px}
+  .tbox .grand{font-size:30px}
+  .foot{grid-template-columns:1fr;padding-top:22px;gap:16px}
+
+  #report{padding:14px;min-height:0}
+  .r-top h2{font-size:20px}
+  .r-ctl{width:100%}
+  .r-ctl select{flex:1;min-height:44px;font-size:16px}
+  .r-ctl .btn{flex:1 1 45%}
+  .kpis{grid-template-columns:1fr 1fr;gap:8px}
+  .kpi{padding:10px 12px}.kpi b{font-size:20px}.kpi small{font-size:12px}
+  .chart{gap:3px;height:170px;padding:6px 0 0}
+  .col .v{font-size:9px}
+  .labs{gap:3px;padding:0}
+  .labs .lf{display:none}.labs .ls{display:inline}
+  .legend{flex-wrap:wrap;gap:6px 14px}
+  #r-table,#r-table tbody{display:block;width:100%}
+  #r-table thead{display:none}
+  #r-table tr{display:grid;grid-template-columns:1fr auto;grid-template-areas:"n t" "d t" "j j" "c b";gap:2px 10px;padding:12px 0;border-top:1px solid #e7e5e4;align-items:center}
+  #r-table tr:nth-child(even) td{background:transparent}
+  #r-table td{border:none;padding:0}
+  #r-table td.c-n{grid-area:n;font-weight:700;font-size:16px}
+  #r-table td.c-d{grid-area:d;color:#78716c;font-size:13px}
+  #r-table td.c-t{grid-area:t;font-size:18px;font-weight:700}
+  #r-table td.c-j{grid-area:j;color:#57534e;font-size:14px;padding:4px 0}
+  #r-table td.c-s{grid-area:c}
+  #r-table td.c-b{grid-area:b}
+  #r-table td.empty{grid-column:1/-1}
+  .mini{min-height:38px;padding:6px 14px;font-size:13px}
+  #r-allpaid{width:100%}
+  #r-allpaid{min-height:44px}
+}
 @media print{
   @page{size:A4;margin:0}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -496,12 +567,12 @@ function renderTotals() {
 function renderItems() {
   $('#items').innerHTML = state.items.map(i => `
     <tr data-id="${i.id}">
-      <td style="padding-left:12px"><input data-k="desc" value="${esc(i.desc)}" placeholder="Subject"></td>
-      <td><input data-k="tin" value="${esc(i.tin)}" placeholder="In" style="font-size:17px"></td>
-      <td><input data-k="tout" value="${esc(i.tout)}" placeholder="Out" style="font-size:17px"></td>
-      <td><input data-k="qty" type="number" min="0" step="0.1" value="${i.qty}" style="font-size:17px"></td>
-      <td><input data-k="price" type="number" min="0" value="${i.price}" style="text-align:right;font-size:17px"></td>
-      <td><div class="amt">${money(i.qty * i.price)}</div></td>
+      <td data-label="Subject" style="padding-left:12px"><input data-k="desc" value="${esc(i.desc)}" placeholder="Subject"></td>
+      <td data-label="Time In"><input data-k="tin" value="${esc(i.tin)}" placeholder="In" style="font-size:17px"></td>
+      <td data-label="Time Out"><input data-k="tout" value="${esc(i.tout)}" placeholder="Out" style="font-size:17px"></td>
+      <td data-label="QTY"><input data-k="qty" type="number" min="0" step="0.1" value="${i.qty}" style="font-size:17px"></td>
+      <td data-label="Unit Price / Month"><input data-k="price" type="number" min="0" value="${i.price}" style="text-align:right;font-size:17px"></td>
+      <td data-label="Amount"><div class="amt">${money(i.qty * i.price)}</div></td>
       <td data-html2canvas-ignore="true" data-noprint style="text-align:center"><button class="del" data-del="${i.id}" title="Remove">🗑</button></td>
     </tr>`).join('');
   renderTotals();
@@ -697,7 +768,7 @@ function renderReport() {
     return '<div class="col' + (k + 1 === m ? ' on' : '') + '" data-m="' + (k + 1) + '"><div class="v">' + (sum ? Math.round(sum) : '') + '</div>' +
       '<div class="stk" style="height:' + h + 'px"><div class="up" style="height:' + (h - hp) + 'px"></div><div class="pd" style="height:' + hp + 'px"></div></div></div>';
   }).join('');
-  $('#r-labs').innerHTML = MONTHS.map((n, k) => '<div class="' + (k + 1 === m ? 'on' : '') + '">' + n + '</div>').join('');
+  $('#r-labs').innerHTML = MONTHS.map((n, k) => '<div class="' + (k + 1 === m ? 'on' : '') + '"><span class="lf">' + n + '</span><span class="ls">' + (k + 1) + '</span></div>').join('');
 
   const rows = rpt.list.filter(i => inMonth(i, y, m)).sort((a, b) => {
     const da = parseDMY(a.date), db = parseDMY(b.date); return (da.d - db.d) || (a.row - b.row);
@@ -723,9 +794,9 @@ function renderReport() {
     $('#k-cmp-s').textContent = 'គ្មានទិន្នន័យខែមុន';
   }
   $('#r-body').innerHTML = rows.length ? rows.map(i =>
-    '<tr><td>' + esc(i.date) + '</td><td>' + esc(i.name) + '</td><td>' + esc(i.subjects) + '</td><td class="n">' + usd(i.total) + '</td>' +
-    '<td><span class="chip ' + (i.paid ? 'p' : 'u') + '">' + (i.paid ? 'Paid' + (i.paidDate ? ' · ' + esc(i.paidDate) : '') : 'Unpaid') + '</span></td>' +
-    '<td class="noprint" data-noprint><button class="mini ' + (i.paid ? '' : 'ok') + '" data-row="' + i.row + '">' + (i.paid ? 'Undo' : 'Mark paid') + '</button></td></tr>'
+    '<tr><td class="c-d">' + esc(i.date) + '</td><td class="c-n">' + esc(i.name) + '</td><td class="c-j">' + esc(i.subjects) + '</td><td class="n c-t">' + usd(i.total) + '</td>' +
+    '<td class="c-s"><span class="chip ' + (i.paid ? 'p' : 'u') + '">' + (i.paid ? 'Paid' + (i.paidDate ? ' · ' + esc(i.paidDate) : '') : 'Unpaid') + '</span></td>' +
+    '<td class="noprint c-b" data-noprint><button class="mini ' + (i.paid ? '' : 'ok') + '" data-row="' + i.row + '">' + (i.paid ? 'Undo' : 'Mark paid') + '</button></td></tr>'
   ).join('') : '<tr><td colspan="6" class="empty">មិនមានវិក្កយបត្រក្នុងខែនេះទេ</td></tr>';
   $('#r-allpaid').classList.toggle('hidden', !rows.some(i => !i.paid));
 }
@@ -767,13 +838,16 @@ $('#r-allpaid').addEventListener('click', () => {
 });
 
 /* ===== logo height = height of the right column (title + details box) ===== */
-function syncLogo() {
+function syncLogo(force) {
   const logo = $('.seller .logo'), right = $('.head .right');
-  if (!logo || !right || $('#app').classList.contains('hidden') || !right.offsetHeight) return;
+  if (!logo || !right || $('#app').classList.contains('hidden')) return;
+  // phones: the header is stacked, so CSS sets a fixed logo height (print/save-image still sync to the right column)
+  if (force !== true && window.matchMedia('(max-width:760px)').matches) { logo.style.height = ''; return; }
+  if (!right.offsetHeight) return;
   for (let i = 0; i < 2; i++) logo.style.height = right.offsetHeight + 'px';
 }
-window.addEventListener('resize', syncLogo);
-window.addEventListener('beforeprint', syncLogo);
+window.addEventListener('resize', () => syncLogo());
+window.addEventListener('beforeprint', () => syncLogo(true));
 window.addEventListener('load', syncLogo);
 $('.seller .logo').addEventListener('load', syncLogo);
 
