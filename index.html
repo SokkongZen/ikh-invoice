@@ -644,7 +644,7 @@ function renderDropdown() {
   } else {
     const list = matches();
     html = list.length
-      ? list.map((s, idx) => `<div class="it" data-idx="${state.students.indexOf(s)}"><b>${esc(s.name)}</b> <small>(${esc(s.studentId)})</small><div>${esc(s.location)} | ${esc(s.subject)}</div></div>`).join('')
+      ? list.map((s, idx) => `<div class="it" data-idx="${state.students.indexOf(s)}"><b>${esc(s.name)}</b> <small>(${esc(s.studentId)})</small><div>${esc(s.location)} | ${esc(s.subject)}${Number(s.discount) > 0 ? ' | ' + esc(s.discount) + '% off' : ''}</div></div>`).join('')
       : '<div class="none">រកមិនឃើញសិស្សនេះទេ (វាយបញ្ចូលថ្មីបាន)</div>';
   }
   dd.innerHTML = html; dd.classList.remove('hidden');
@@ -660,6 +660,7 @@ dd.addEventListener('mousedown', e => {
     desc: s.subject || '', tin: s.timeIn || '', tout: s.timeOut || '',
     qty: duration(s.timeIn, s.timeOut) || 1, price: parseFloat(s.price) || 0
   })];
+  if (s.discount !== undefined) { state.discount = Math.min(100, Math.max(0, Number(s.discount) || 0)); $('#f-disc').value = state.discount; }
   dd.classList.add('hidden');
   renderStudentFields(); renderItems();
 });
@@ -669,7 +670,7 @@ $('#b-sync').addEventListener('click', () => { sync(); });
 $('#b-new').addEventListener('click', async () => {
   state.number = 'Generating...'; $('#f-num').value = state.number;
   const n = await sync({ bump: true });
-  Object.assign(state, { number: n, name: '', addr: '', phone: '', items: [newItem({ id: Date.now() })] });
+  Object.assign(state, { number: n, name: '', addr: '', phone: '', discount: 0, items: [newItem({ id: Date.now() })] });
   renderAll();
 });
 $('#b-save').addEventListener('click', saveToSheets);

@@ -136,6 +136,7 @@ function doGet(e) {
         phone: String(data[j][4] || ''),
         location: String(data[j][5] || ''),
         price: num_(data[j][6]),
+        discount: num_(data[j][7]),
         subject: String(data[j][11] || ''),
         timeIn: String(data[j][12] || ''),
         timeOut: String(data[j][13] || '')
