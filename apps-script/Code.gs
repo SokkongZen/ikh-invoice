@@ -1,4 +1,6 @@
-// ===== ikh-DB : EDU-ikh Invoice Backend (v2: report + Mark Paid) =====
+// ===== ikh-DB : EDU-ikh Invoice Backend (v3: report + Mark Paid + password/token) =====
+// SETUP: Project Settings -> Script Properties -> add  ADMIN_PASSWORD = <your password>
+// Every request must carry a valid token (obtained from ?action=login&pw=...).
 // Columns: A Date | B Invoice No | C Saved At | D Student | E Phone | F Location
 //          G Subtotal | H Discount % | I Total | J Validity Start | K Due Date
 //          L Subjects | M Time In | N Time Out | O Paid | P Paid Date
@@ -42,10 +44,64 @@ function num_(v) {
   return parseFloat(String(v || '0').replace(/[^0-9.-]+/g, '')) || 0;
 }
 
+
+// ---------- AUTH ----------
+var TOKEN_TTL_MS = 12 * 60 * 60 * 1000;   // token valid 12 hours
+var MAX_FAILS = 5;                         // failed logins allowed ...
+var LOCK_SECONDS = 600;                    // ... per 10 minutes
+
+function adminPw_() {
+  return PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD') || '';
+}
+
+function hex_(bytes) {
+  return bytes.map(function (b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('');
+}
+
+function sign_(msg, pw) {
+  return hex_(Utilities.computeHmacSha256Signature(msg, pw));
+}
+
+function makeToken_(pw) {
+  var exp = String(Date.now() + TOKEN_TTL_MS);
+  return exp + '.' + sign_(exp, pw);
+}
+
+function validToken_(token) {
+  var pw = adminPw_();
+  if (!pw || !token) return false;
+  var parts = String(token).split('.');
+  if (parts.length !== 2) return false;
+  if (!(Number(parts[0]) > Date.now())) return false;
+  var expected = sign_(parts[0], pw), got = parts[1], diff = expected.length ^ got.length;
+  for (var i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ (got.charCodeAt(i) || 0);
+  return diff === 0;
+}
+
+function login_(e) {
+  var pw = adminPw_();
+  if (!pw) return { ok: false, error: 'ADMIN_PASSWORD is not set in Script Properties' };
+  var cache = CacheService.getScriptCache();
+  var fails = Number(cache.get('fails') || 0);
+  if (fails >= MAX_FAILS) return { ok: false, error: 'locked', message: 'Too many attempts. Try again in 10 minutes.' };
+  var given = String((e.parameter && e.parameter.pw) || '');
+  var diff = given.length ^ pw.length;
+  for (var i = 0; i < pw.length; i++) diff |= pw.charCodeAt(i) ^ (given.charCodeAt(i) || 0);
+  if (diff === 0) {
+    cache.remove('fails');
+    return { ok: true, token: makeToken_(pw) };
+  }
+  cache.put('fails', String(fails + 1), LOCK_SECONDS);
+  Utilities.sleep(1000);
+  return { ok: false, error: 'wrong' };
+}
+
 // ---------- GET ----------
 function doGet(e) {
   try {
     var action = e && e.parameter && e.parameter.action;
+    if (action === 'login') return output_(login_(e), e);
+    if (!validToken_(e && e.parameter && e.parameter.token)) return output_({ error: 'unauthorized' }, e);
     var sheet = getSheet_();
     var data = readRows_(sheet);
 
@@ -97,6 +153,7 @@ function doPost(e) {
   try {
     lock.waitLock(20000);
     var p = JSON.parse(e.postData.contents);
+    if (!validToken_(p.token)) return json_({ ok: false, error: 'unauthorized' });
     var sheet = getSheet_();
     if (p.action === 'markPaid') return markPaid_(sheet, p);
     return saveInvoice_(sheet, p);

@@ -161,10 +161,9 @@ body:not(.report-mode) .rpt-only{display:none!important}
     <div class="glass">
       <h2>System Login</h2>
       <p class="sub">EDU-ikh | Invoice</p>
-      <div id="login-err" class="err hidden">Username ឬ Password មិនត្រឹមត្រូវទេ!</div>
+      <div id="login-err" class="err hidden">Password មិនត្រឹមត្រូវទេ!</div>
       <form id="login-form" autocomplete="on">
-        <label for="u">Username</label><input id="u" type="text" autocomplete="username" required>
-        <label for="p">Password</label><input id="p" type="password" autocomplete="current-password" required>
+        <label for="p">Password</label><input id="p" type="password" autocomplete="current-password" required autofocus>
         <button class="btn dark" style="width:100%;justify-content:center;padding:12px" type="submit">Access System</button>
       </form>
     </div>
@@ -286,8 +285,7 @@ body:not(.report-mode) .rpt-only{display:none!important}
 const CFG = {
   SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbytbl9TY3ygicO9bqC8zSMbaI772NTHr7fuAAUgusaxSIqM1NJ6-ikrseZXZOgQBXTH/exec',
   // SHA-256 of "username:password" (no plain-text password in the page)
-  LOGIN_HASH: 'dda5e068edb63a61b46ed234003dc5d2107e3861959cdd1b97f47f4d8c3b906e',
-  SESSION_KEY: 'edu_ikh_logged_in',
+  TOKEN_KEY: 'edu_ikh_token',
   SEQ_KEY: 'edu_ikh_invoice_seq_v2',
   DEFAULT_SEQ: 1221,
   CURRENCY: '$',
@@ -348,33 +346,39 @@ function buildMathBg() {
   }
 }
 
-/* ================= LOGIN ================= */
-async function sha256(s) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+/* ================= LOGIN (password is verified by the Apps Script, token kept for this tab only) ================= */
+const getToken = () => {
+  const t = sessionStorage.getItem(CFG.TOKEN_KEY) || '';
+  return Number(t.split('.')[0]) > Date.now() ? t : '';
+};
+function logout(msg) {
+  sessionStorage.removeItem(CFG.TOKEN_KEY); rpt.loaded = false; rpt.list = []; setMode(false);
+  $('#app').classList.add('hidden'); $('#login').classList.remove('hidden');
+  $('#p').value = '';
+  const err = $('#login-err');
+  if (msg) { err.textContent = msg; err.classList.remove('hidden'); } else err.classList.add('hidden');
 }
 $('#login-form').addEventListener('submit', async e => {
   e.preventDefault();
-  const err = $('#login-err');
+  const err = $('#login-err'), btn = e.target.querySelector('button');
+  btn.disabled = true; btn.textContent = 'Checking...';
   try {
-    if (!window.crypto || !crypto.subtle) throw new Error('need https');
-    const h = await sha256($('#u').value + ':' + $('#p').value);
-    if (h === CFG.LOGIN_HASH) {
-      sessionStorage.setItem(CFG.SESSION_KEY, 'true');
-      err.classList.add('hidden');
-      enterApp();
-    } else { err.textContent = 'Username ឬ Password មិនត្រឹមត្រូវទេ!'; err.classList.remove('hidden'); }
+    const d = await remote('action=login&pw=' + encodeURIComponent($('#p').value), true);
+    if (d && d.ok && d.token) {
+      sessionStorage.setItem(CFG.TOKEN_KEY, d.token);
+      err.classList.add('hidden'); enterApp();
+    } else if (d && d.error === 'locked') {
+      err.textContent = 'ព្យាយាមច្រើនដងពេក សូមរង់ចាំ ១០ នាទី'; err.classList.remove('hidden');
+    } else if (d && d.error && d.error !== 'wrong') {
+      err.textContent = 'Server: ' + d.error; err.classList.remove('hidden');
+    } else { err.textContent = 'Password មិនត្រឹមត្រូវទេ!'; err.classList.remove('hidden'); }
   } catch (x) {
-    err.textContent = 'សូមបើកគេហទំព័រតាមរយៈ https:// (ឧ. Vercel)'; err.classList.remove('hidden');
-  }
+    console.error(x);
+    err.textContent = 'ភ្ជាប់ទៅ Apps Script មិនបាន (ពិនិត្យ Deploy / អ៊ីនធឺណិត)'; err.classList.remove('hidden');
+  } finally { btn.disabled = false; btn.textContent = 'Access System'; $('#p').value = ''; }
 });
-$('#b-out').addEventListener('click', () => {
-  sessionStorage.removeItem(CFG.SESSION_KEY); setMode(false);
-  $('#app').classList.add('hidden'); $('#login').classList.remove('hidden');
-  $('#u').value = ''; $('#p').value = '';
-});
+$('#b-out').addEventListener('click', () => logout());
 
-/* ================= DATA (Google Apps Script) ================= */
 function jsonp(url, timeout) {
   return new Promise((resolve, reject) => {
     const cb = '__edu_cb_' + Date.now();
@@ -387,17 +391,33 @@ function jsonp(url, timeout) {
     document.head.appendChild(s);
   });
 }
-async function remote(q) {
+async function remote(q, noToken) {
   // 1) normal fetch  2) JSONP fallback (works even if CORS header is missing, as long as doGet supports ?callback=)
-  const u = CFG.SCRIPT_URL + (q ? '?' + q : '');
+  let qs = q || '';
+  if (!noToken) {
+    const t = getToken();
+    if (!t) { logout('Session ផុតកំណត់ សូម Login ម្តងទៀត'); throw new Error('unauthorized'); }
+    qs += (qs ? '&' : '') + 'token=' + encodeURIComponent(t);
+  }
+  const u = CFG.SCRIPT_URL + (qs ? '?' + qs : '');
+  let data;
   try {
-    const r = await fetch(u + (q ? '&' : '?') + '_=' + Date.now(), { redirect: 'follow' });
+    const r = await fetch(u + (qs ? '&' : '?') + '_=' + Date.now(), { redirect: 'follow' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
-    return await r.json();
+    data = await r.json();
   } catch (e1) {
     console.warn('fetch failed, trying JSONP:', e1);
-    return await jsonp(u);
+    data = await jsonp(u);
   }
+  if (data && data.error === 'unauthorized') { logout('Session ផុតកំណត់ ឬ Password ប្តូរ សូម Login ម្តងទៀត'); throw new Error('unauthorized'); }
+  return data;
+}
+async function post(obj) {
+  const t = getToken();
+  if (!t) { logout('Session ផុតកំណត់ សូម Login ម្តងទៀត'); throw new Error('unauthorized'); }
+  obj.token = t;
+  // no-cors: response is opaque, so "success" means the request was sent
+  await fetch(CFG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(obj) });
 }
 const loadRemote = () => remote('');
 function localSeq() { return parseInt(localStorage.getItem(CFG.SEQ_KEY)) || CFG.DEFAULT_SEQ; }
@@ -449,8 +469,7 @@ async function saveToSheets() {
     timeOuts: state.items.map(i => i.tout || 'N/A').join(', ')
   };
   try {
-    // no-cors: response is opaque, so "success" means the request was sent
-    await fetch(CFG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+    await post(payload);
     toast('ok', 'ជោគជ័យ! ទិន្នន័យត្រូវបានផ្ញើទៅរក្សាទុក។');
   } catch (e) {
     toast('bad', 'បរាជ័យ! មានបញ្ហាក្នុងការរក្សាទុក។');
@@ -698,8 +717,7 @@ async function setPaid(items, paid) {
   items.forEach(i => { i.paid = paid; i.paidDate = paid ? today : ''; });
   renderReport();                                   // optimistic
   try {
-    await fetch(CFG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'markPaid', paid: paid, items: items.map(i => ({ row: i.row, invoiceNumber: i.invoiceNo })) }) });
+    await post({ action: 'markPaid', paid: paid, items: items.map(i => ({ row: i.row, invoiceNumber: i.invoiceNo })) });
     toast('ok', paid ? 'បានកត់ត្រាថា Paid' : 'បានដក Paid ចេញ');
     setTimeout(loadReport, 1500);                   // confirm from the sheet
   } catch (e) { toast('bad', 'កត់ត្រាមិនបាន សូមព្យាយាមម្តងទៀត'); loadReport(); }
@@ -751,7 +769,7 @@ async function enterApp() {
   state.number = await sync(); $('#f-num').value = state.number;
 }
 buildMathBg();
-if (sessionStorage.getItem(CFG.SESSION_KEY) === 'true') enterApp();
+if (getToken()) enterApp();
 })();
 </script>
 </body>
