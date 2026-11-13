@@ -103,41 +103,6 @@ td .amt{text-align:right;font-weight:700;font-size:20px;padding-right:10px;white
 .box.mono{font-family:ui-monospace,Menlo,monospace}
 
 
-
-/* lessons & homework */
-#lesson{display:grid;gap:14px}
-.lcard{background:#fff;box-shadow:0 10px 25px rgba(0,0,0,.08);border-radius:8px;padding:20px}
-.lcard h2{margin:0;font-size:20px;font-weight:800}
-.lcard h3{margin:0 0 8px;font-size:16px;font-weight:700}
-.l-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
-.l-sub{font-size:13px;color:#78716c}
-.lcard label.lab{display:block;font-size:12px;font-weight:600;color:#78716c;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.04em}
-.lcard input[type=text],.lcard select{padding:10px 12px;border:1px solid #d6d3d1;border-radius:6px;background:#fff;font-size:16px;min-height:44px;min-width:0;width:100%}
-.lcard input:focus,.lcard select:focus{outline:2px solid #a8a29e}
-.chips{display:flex;gap:8px;flex-wrap:wrap}
-.chp{border:1px solid #d6d3d1;border-radius:999px;background:#fff;padding:9px 16px;font-size:15px;font-weight:600;cursor:pointer;color:#44403c;min-height:40px}
-.chp.on{background:#292524;border-color:#292524;color:#fff}
-.chp.err.on{background:#fef3c7;border-color:#f59e0b;color:#92400e}
-.l-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}
-.l-row>*{flex:1 1 140px}
-.l-row>button{flex:0 0 auto}
-.l-chk{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:15px;font-weight:600;cursor:pointer}
-.l-chk input{width:20px;height:20px}
-.l-msg{font-size:13px;color:#dc2626;min-height:18px;margin-top:8px}
-.l-ok{font-size:13px;color:#15803d;margin-left:10px}
-.li{display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;align-items:center;padding:11px 0;border-top:1px solid #e7e5e4}
-.li:first-of-type{border-top:none}
-.li .nm{font-weight:700}
-.li .tp{grid-column:1/2;color:#57534e;font-size:14px}
-.li .meta2{grid-column:1/2;font-size:12px;color:#78716c}
-.li .act{grid-column:3;grid-row:1/4;align-self:center}
-.li.late .meta2{color:#dc2626;font-weight:600}
-.lnone{padding:14px 0;color:#78716c;font-size:14px}
-.efreq{display:grid;gap:8px}
-.efreq .r{display:grid;grid-template-columns:90px 1fr;gap:10px;align-items:start;font-size:14px}
-.efreq .r b{font-weight:700}
-.etag{display:inline-block;background:#fef3c7;color:#92400e;border-radius:6px;padding:3px 9px;font-size:13px;margin:0 6px 4px 0}
-
 /* report */
 #report{background:#fff;box-shadow:0 20px 40px rgba(0,0,0,.12);padding:32px;border-radius:2px;min-height:60vh}
 .r-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px}
@@ -170,10 +135,8 @@ td .amt{text-align:right;font-weight:700;font-size:20px;padding-right:10px;white
 .mini{border:1px solid #d6d3d1;background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer}
 .mini:hover{background:#f5f5f4}.mini.ok{background:#16a34a;border-color:#16a34a;color:#fff}.mini.ok:hover{background:#15803d}
 .empty{padding:28px;text-align:center;color:#78716c}
-body.report-mode .inv-only,body.lesson-mode .inv-only{display:none!important}
-body:not(.report-mode):not(.lesson-mode) .sub-only{display:none!important}
-body.report-mode .no-rpt{display:none!important}
-body.lesson-mode .no-les{display:none!important}
+body.report-mode .inv-only{display:none!important}
+body:not(.report-mode) .rpt-only{display:none!important}
 .labs .ls{display:none}
 @media screen and (max-width:760px){
   #app{padding:8px}
@@ -285,9 +248,8 @@ body.lesson-mode .no-les{display:none!important}
       <div class="toolbar noprint">
         <h1>Invoice Dashboard</h1>
         <div class="btns">
-          <button class="btn sub-only" id="b-back">← វិក្កយបត្រ</button>
-          <button class="btn no-les" id="b-lessons">មេរៀន និងកិច្ចការផ្ទះ</button>
-          <button class="btn no-rpt" id="b-report">របាយការណ៍ប្រចាំខែ</button>
+          <button class="btn rpt-only" id="b-back">← វិក្កយបត្រ</button>
+          <button class="btn inv-only" id="b-report">របាយការណ៍ប្រចាំខែ</button>
           <button class="btn blue inv-only" id="b-sync">⟳ <span>Sync Data</span></button>
           <button class="btn inv-only" id="b-new">＋ New Invoice</button>
           <button class="btn green inv-only" id="b-save">Save to Sheets</button>
@@ -354,51 +316,6 @@ body.lesson-mode .no-les{display:none!important}
         <div class="foot">
           <div><h4>Thank You For choosing</h4><div class="box" id="f-note" contenteditable spellcheck="false"></div></div>
           <div><h4>Bank Transfer Info</h4><div class="box mono" id="f-pay" contenteditable spellcheck="false"></div></div>
-        </div>
-      </div>
-
-      <div id="lesson" class="hidden">
-        <div class="lcard">
-          <div class="l-head"><h2>កត់មេរៀនថ្មី</h2><span class="l-sub" id="l-today"></span></div>
-          <label class="lab">សិស្ស</label>
-          <div class="chips" id="l-stu"></div>
-          <div style="margin-top:8px"><input id="l-new" type="text" placeholder="ឬវាយឈ្មោះសិស្សថ្មី" autocomplete="off"></div>
-          <div class="l-row">
-            <div><label class="lab">ថ្នាក់</label><select id="l-grade"></select></div>
-            <div><label class="lab">ម៉ោង</label><select id="l-hrs"></select></div>
-          </div>
-          <label class="lab">មុខវិជ្ជា</label>
-          <div class="chips" id="l-sub"></div>
-          <label class="lab" for="l-topic">ប្រធានបទ</label>
-          <div class="l-row"><input id="l-topic" type="text" placeholder="ឧ. សមីការដឺក្រេទី២" autocomplete="off"><button class="btn" id="l-same" type="button">ដូចមេរៀនមុន</button></div>
-          <div id="l-errbox">
-            <label class="lab">កំហុសដែលសិស្សធ្វើខុស (ជម្រើស)</label>
-            <div class="chips" id="l-err"></div>
-          </div>
-          <label class="l-chk"><input type="checkbox" id="l-hwon" checked> ចាត់កិច្ចការផ្ទះផងដែរ</label>
-          <div class="l-row" id="l-hwbox" style="margin-top:8px">
-            <input id="l-hwt" type="text" placeholder="កិច្ចការផ្ទះ (ទុកទទេ = ដូចប្រធានបទ)" autocomplete="off">
-            <select id="l-due"><option value="3">ក្នុង ៣ ថ្ងៃ</option><option value="5">ក្នុង ៥ ថ្ងៃ</option><option value="7">ក្នុង ៧ ថ្ងៃ</option></select>
-          </div>
-          <div class="l-msg" id="l-msg"></div>
-          <div style="margin-top:6px"><button class="btn green" id="l-save" style="min-width:140px">រក្សាទុក</button><span class="l-ok" id="l-ok"></span></div>
-        </div>
-
-        <div class="lcard">
-          <div class="l-head"><h3>កិច្ចការផ្ទះរង់ចាំ</h3><span class="l-sub">ចុច "ផ្ញើហើយ" ពេលសិស្សផ្ញើមក</span></div>
-          <div id="l-pend"></div>
-        </div>
-        <div class="lcard">
-          <div class="l-head"><h3>កំហុសញឹកញាប់ (៣០ ថ្ងៃចុងក្រោយ)</h3></div>
-          <div class="efreq" id="l-efreq"></div>
-        </div>
-        <div class="lcard">
-          <div class="l-head"><h3>មេរៀនថ្មីៗ</h3><button class="btn" id="l-refresh" type="button">⟳</button></div>
-          <div id="l-recent"></div>
-        </div>
-        <div class="lcard" id="l-sentbox">
-          <div class="l-head"><h3>ផ្ញើហើយ (ថ្មីៗ)</h3></div>
-          <div id="l-sent"></div>
         </div>
       </div>
 
@@ -508,7 +425,7 @@ const getToken = () => {
   return Number(t.split('.')[0]) > Date.now() ? t : '';
 };
 function logout(msg) {
-  sessionStorage.removeItem(CFG.TOKEN_KEY); rpt.loaded = false; rpt.list = []; les.loaded = false; les.lessons = []; les.homework = []; les.local = {}; setMode(false);
+  sessionStorage.removeItem(CFG.TOKEN_KEY); rpt.loaded = false; rpt.list = []; setMode(false);
   $('#app').classList.add('hidden'); $('#login').classList.remove('hidden');
   $('#p').value = '';
   const err = $('#login-err');
@@ -810,16 +727,12 @@ function parseDMY(s) {
 }
 function inMonth(i, y, m) { const d = parseDMY(i.date); return d && d.y === y && d.m === m; }
 
-function setView(v) {
-  document.body.classList.toggle('report-mode', v === 'report');
-  document.body.classList.toggle('lesson-mode', v === 'lesson');
-  $('#invoice').classList.toggle('hidden', v !== 'invoice');
-  $('#report').classList.toggle('hidden', v !== 'report');
-  $('#lesson').classList.toggle('hidden', v !== 'lesson');
-  if (v === 'invoice') syncLogo();
-  window.scrollTo(0, 0);
+function setMode(report) {
+  document.body.classList.toggle('report-mode', report);
+  $('#invoice').classList.toggle('hidden', report);
+  $('#report').classList.toggle('hidden', !report);
+  if (!report) syncLogo();
 }
-const setMode = report => setView(report ? 'report' : 'invoice');
 async function loadReport() {
   const b = $('#r-refresh'); b.disabled = true; b.textContent = 'Loading...';
   try {
@@ -923,170 +836,6 @@ $('#r-allpaid').addEventListener('click', () => {
   const todo = rpt.list.filter(i => inMonth(i, rpt.year, rpt.month) && !i.paid);
   if (todo.length && confirm('កត់ត្រាថា Paid ទាំង ' + todo.length + ' វិក្កយបត្រក្នុងខែនេះ?')) setPaid(todo, true);
 });
-
-/* ================= LESSONS & HOMEWORK ================= */
-const SUBJECTS = ['គណិត', 'រូប', 'គីមី', 'ខ្មែរ', 'ផ្សេងៗ'];
-const GRADES = [7, 8, 9, 10, 11, 12];
-const ERR_TYPES = {
-  'គណិត': ['រូបមន្ត/ក្បួន', 'ការគណនា/សញ្ញា', 'យល់ខុសសំណួរ', 'រំលងជំហាន', 'មិនដឹងចាប់ផ្តើម'],
-  'រូប': ['រូបមន្ត', 'ឯកតា', 'គំនិតខុស', 'គំនូសតាង', 'ការជំនួស/គណនា'],
-  'គីមី': ['តុល្យភាពសមីការ', 'ការគណនាម៉ូល', 'ឈ្មោះ/រូបមន្តសារធាតុ', 'គំនិតខុស', 'ឯកតា'],
-  'ខ្មែរ': ['អក្ខរាវិរុទ្ធ', 'វេយ្យាករណ៍', 'ការយល់អត្ថបទ', 'ការរៀបរៀងសេចក្តី', 'វាក្យសព្ទ']
-};
-const les = { lessons: [], homework: [], loaded: false, student: '', subject: '', errs: {}, saving: false, local: {} };
-const newId = p => p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-const dateObj = s => { const d = parseDMY(s); return d ? new Date(d.y, d.m - 1, d.d) : null; };
-const todayMid = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); };
-
-function lessonStudents() {
-  const names = [];
-  (state.students || []).forEach(x => { if (x.name && names.indexOf(x.name) < 0) names.push(x.name); });
-  les.lessons.forEach(x => { if (x.student && names.indexOf(x.student) < 0) names.push(x.student); });
-  if (les.student && names.indexOf(les.student) < 0) names.push(les.student);
-  return names;
-}
-function lastLessonOf(name) {
-  for (let i = les.lessons.length - 1; i >= 0; i--) if (les.lessons[i].student === name) return les.lessons[i];
-  return null;
-}
-function pickStudent(name) {
-  les.student = name; les.errs = {}; $('#l-msg').textContent = ''; $('#l-ok').textContent = '';
-  const p = lastLessonOf(name);
-  if (p) {                                   // prefill from the student's previous lesson
-    if (p.grade) $('#l-grade').value = String(p.grade);
-    if (SUBJECTS.indexOf(p.subject) >= 0) les.subject = p.subject;
-  }
-  renderLessonForm();
-}
-function renderLessonForm() {
-  const names = lessonStudents();
-  $('#l-stu').innerHTML = names.length
-    ? names.map(n => '<button type="button" class="chp' + (n === les.student ? ' on' : '') + '" data-stu="' + esc(n) + '">' + esc(n) + '</button>').join('')
-    : '<span class="l-sub">មិនទាន់មានឈ្មោះសិស្ស — ចុច Sync ក្នុងទំព័រវិក្កយបត្រ ឬវាយឈ្មោះខាងក្រោម</span>';
-  $('#l-sub').innerHTML = SUBJECTS.map(n => '<button type="button" class="chp' + (n === les.subject ? ' on' : '') + '" data-sub="' + n + '">' + n + '</button>').join('');
-  const types = ERR_TYPES[les.subject] || [];
-  $('#l-errbox').classList.toggle('hidden', !types.length);
-  $('#l-err').innerHTML = types.map(n => '<button type="button" class="chp err' + (les.errs[n] ? ' on' : '') + '" data-err="' + esc(n) + '">' + esc(n) + '</button>').join('');
-  $('#l-hwbox').style.opacity = $('#l-hwon').checked ? 1 : .35;
-  $('#l-today').textContent = 'ថ្ងៃនេះ ' + today;
-}
-function initLessonForm() {
-  if ($('#l-grade').options.length) return;
-  $('#l-grade').innerHTML = '<option value="">—</option>' + GRADES.map(g => '<option value="' + g + '">ថ្នាក់ទី ' + g + '</option>').join('');
-  $('#l-hrs').innerHTML = ['1', '1.5', '2', '2.5', '3'].map(h => '<option' + (h === '1.5' ? ' selected' : '') + '>' + h + '</option>').join('');
-}
-function renderLessonLists() {
-  const now = todayMid();
-  const pend = les.homework.filter(h => !h.sent).sort((a, b) => (dateObj(a.due) || 0) - (dateObj(b.due) || 0));
-  $('#l-pend').innerHTML = pend.length ? pend.map(h => {
-    const d = dateObj(h.due), late = d && d < now;
-    return '<div class="li' + (late ? ' late' : '') + '"><div class="nm">' + esc(h.student) + ' <span class="l-sub">' + esc(h.subject) + '</span></div>' +
-      '<div class="tp">' + esc(h.topic) + '</div><div class="meta2">' + (late ? 'ហួសកំណត់ ' : 'ដល់ ') + esc(h.due) + '</div>' +
-      '<div class="act"><button class="mini ok" data-hw="' + esc(h.id) + '" data-sent="1">ផ្ញើហើយ</button></div></div>';
-  }).join('') : '<div class="lnone">គ្មានកិច្ចការរង់ចាំ</div>';
-
-  const sent = les.homework.filter(h => h.sent).slice(-5).reverse();
-  $('#l-sentbox').classList.toggle('hidden', !sent.length);
-  $('#l-sent').innerHTML = sent.map(h => '<div class="li"><div class="nm">' + esc(h.student) + ' <span class="l-sub">' + esc(h.subject) + '</span></div>' +
-    '<div class="tp">' + esc(h.topic) + '</div><div class="meta2">ផ្ញើ ' + esc(h.sentDate || '') + '</div>' +
-    '<div class="act"><button class="mini" data-hw="' + esc(h.id) + '" data-sent="0">Undo</button></div></div>').join('');
-
-  const recent = les.lessons.slice(-8).reverse();
-  $('#l-recent').innerHTML = recent.length ? recent.map(l => '<div class="li"><div class="nm">' + esc(l.student) + ' <span class="l-sub">' +
-    esc(l.subject) + (l.grade ? ' · ថ្នាក់ទី ' + esc(l.grade) : '') + '</span></div><div class="tp">' + esc(l.topic) + '</div>' +
-    '<div class="meta2">' + esc(l.date) + ' · ' + esc(l.hours) + ' ម៉ោង' + (l.errors.length ? ' · កំហុស ' + l.errors.length : '') + '</div></div>').join('')
-    : '<div class="lnone">មិនទាន់មានមេរៀន</div>';
-
-  const since = new Date(now.getTime() - 30 * 86400000), by = {};
-  les.lessons.forEach(l => {
-    const d = dateObj(l.date); if (!d || d < since) return;
-    l.errors.forEach(e => { const k = l.student; by[k] = by[k] || {}; const t = (l.subject ? l.subject + ': ' : '') + e; by[k][t] = (by[k][t] || 0) + 1; });
-  });
-  const stu = Object.keys(by);
-  $('#l-efreq').innerHTML = stu.length ? stu.map(n => {
-    const top = Object.keys(by[n]).sort((a, b) => by[n][b] - by[n][a]).slice(0, 3);
-    return '<div class="r"><b>' + esc(n) + '</b><div>' + top.map(t => '<span class="etag">' + esc(t) + ' ×' + by[n][t] + '</span>').join('') + '</div></div>';
-  }).join('') : '<div class="lnone">មិនទាន់មានកំហុសដែលបានកត់ត្រា</div>';
-}
-async function loadLessons() {
-  const b = $('#l-refresh'); b.disabled = true;
-  try {
-    const d = await remote('action=lessons');
-    if (!d || !Array.isArray(d.lessons)) throw new Error('deploy the new Apps Script');
-    const keep = les.local, nowT = Date.now();
-    // keep very recent local items that the sheet has not returned yet (writes take a moment)
-    Object.keys(keep).forEach(k => { if (nowT - keep[k].t > 30000) delete keep[k]; });
-    const L = d.lessons.slice(), H = d.homework.slice();
-    Object.keys(keep).forEach(k => {
-      const it = keep[k];
-      if (it.kind === 'lesson' && !L.some(x => x.id === k)) L.push(it.v);
-      if (it.kind === 'hw' && !H.some(x => x.id === k)) H.push(it.v);
-      if (it.kind === 'hws') { const h = H.find(x => x.id === it.id); if (h) { h.sent = it.v.sent; h.sentDate = it.v.sentDate; } }
-    });
-    les.lessons = L; les.homework = H; les.loaded = true;
-  } catch (e) {
-    console.error(e);
-    if (String(e.message) !== 'unauthorized') toast('bad', 'ទាញទិន្នន័យមេរៀនមិនបាន — សូម Deploy Apps Script ជំនាន់ថ្មី (Anyone)', 6000);
-  } finally { b.disabled = false; }
-  renderLessonForm(); renderLessonLists();
-}
-async function saveLesson() {
-  if (les.saving) return;
-  const name = (les.student || $('#l-new').value).trim(), topic = $('#l-topic').value.trim(), msg = $('#l-msg');
-  if (!name) { msg.textContent = 'ជ្រើសសិស្ស ឬវាយឈ្មោះសិស្ស'; return; }
-  if (!les.subject) { msg.textContent = 'ជ្រើសមុខវិជ្ជា'; return; }
-  if (!topic) { msg.textContent = 'បញ្ចូលប្រធានបទ'; $('#l-topic').focus(); return; }
-  msg.textContent = ''; les.saving = true;
-  const btn = $('#l-save'); btn.disabled = true; btn.textContent = 'Saving...';
-  const lesson = { id: newId('L'), date: today, student: name, grade: $('#l-grade').value, subject: les.subject, topic: topic,
-    hours: Number($('#l-hrs').value) || 0, errors: Object.keys(les.errs).filter(k => les.errs[k]) };
-  let homework = null;
-  if ($('#l-hwon').checked) {
-    const due = new Date(); due.setDate(due.getDate() + Number($('#l-due').value));
-    homework = { id: newId('H'), assigned: today, student: name, subject: les.subject, topic: $('#l-hwt').value.trim() || topic, due: fmtDate(due) };
-  }
-  try {
-    await post({ action: 'saveLesson', lesson: lesson, homework: homework });
-    les.lessons.push({ row: 0, id: lesson.id, date: lesson.date, student: name, grade: lesson.grade, subject: lesson.subject, topic: topic, hours: lesson.hours, errors: lesson.errors });
-    les.local[lesson.id] = { kind: 'lesson', t: Date.now(), v: les.lessons[les.lessons.length - 1] };
-    if (homework) {
-      const h = { row: 0, id: homework.id, assigned: homework.assigned, student: name, subject: homework.subject, topic: homework.topic, due: homework.due, sent: false, sentDate: '' };
-      les.homework.push(h); les.local[h.id] = { kind: 'hw', t: Date.now(), v: h };
-    }
-    $('#l-ok').textContent = 'បានរក្សាទុក ' + name + (homework ? ' និងកិច្ចការផ្ទះ' : '');
-    les.student = name; $('#l-new').value = ''; $('#l-topic').value = ''; $('#l-hwt').value = ''; les.errs = {};
-    renderLessonForm(); renderLessonLists();
-    setTimeout(loadLessons, 2500);
-  } catch (e) { if (String(e.message) !== 'unauthorized') msg.textContent = 'រក្សាទុកមិនបាន សូមព្យាយាមម្តងទៀត'; }
-  finally { les.saving = false; btn.disabled = false; btn.textContent = 'រក្សាទុក'; }
-}
-async function setHomeworkSent(id, sent) {
-  const h = les.homework.find(x => x.id === id); if (!h) return;
-  h.sent = sent; h.sentDate = sent ? today : '';
-  les.local[id + ':s'] = { kind: 'hws', id: id, t: Date.now(), v: { sent: sent, sentDate: h.sentDate } };
-  renderLessonLists();
-  try { await post({ action: 'homeworkStatus', id: id, sent: sent }); setTimeout(loadLessons, 2500); }
-  catch (e) { if (String(e.message) !== 'unauthorized') toast('bad', 'កត់ត្រាមិនបាន សូមព្យាយាមម្តងទៀត'); loadLessons(); }
-}
-$('#b-lessons').addEventListener('click', () => { initLessonForm(); setView('lesson'); renderLessonForm(); renderLessonLists(); if (!les.loaded) loadLessons(); });
-$('#l-refresh').addEventListener('click', loadLessons);
-$('#l-save').addEventListener('click', saveLesson);
-$('#l-stu').addEventListener('click', e => { const b = e.target.closest('[data-stu]'); if (b) { $('#l-new').value = ''; pickStudent(b.dataset.stu); } });
-$('#l-new').addEventListener('input', () => { if ($('#l-new').value) { les.student = ''; les.errs = {}; renderLessonForm(); } $('#l-msg').textContent = ''; });
-$('#l-sub').addEventListener('click', e => { const b = e.target.closest('[data-sub]'); if (b) { les.subject = b.dataset.sub; les.errs = {}; $('#l-msg').textContent = ''; renderLessonForm(); } });
-$('#l-err').addEventListener('click', e => { const b = e.target.closest('[data-err]'); if (b) { les.errs[b.dataset.err] = !les.errs[b.dataset.err]; renderLessonForm(); } });
-$('#l-hwon').addEventListener('change', renderLessonForm);
-$('#l-topic').addEventListener('input', () => { $('#l-msg').textContent = ''; });
-$('#l-same').addEventListener('click', () => {
-  const n = les.student; if (!n) { $('#l-msg').textContent = 'ជ្រើសសិស្សជាមុនសិន'; return; }
-  const p = lastLessonOf(n); if (!p) { $('#l-msg').textContent = 'សិស្សនេះមិនទាន់មានមេរៀនមុនទេ'; return; }
-  $('#l-topic').value = p.topic; if (p.grade) $('#l-grade').value = String(p.grade);
-  if (SUBJECTS.indexOf(p.subject) >= 0) les.subject = p.subject;
-  if (p.hours) $('#l-hrs').value = String(p.hours);
-  $('#l-msg').textContent = ''; renderLessonForm();
-});
-$('#l-pend').addEventListener('click', e => { const b = e.target.closest('[data-hw]'); if (b) setHomeworkSent(b.dataset.hw, true); });
-$('#l-sent').addEventListener('click', e => { const b = e.target.closest('[data-hw]'); if (b) setHomeworkSent(b.dataset.hw, false); });
 
 /* ===== logo height = height of the right column (title + details box) ===== */
 function syncLogo(force) {
