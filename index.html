@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDU-ikh Invoice System</title>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;font-family:'Inter','Battambang',sans-serif;color:#292524;background:#e7e5e1}
+input,textarea,button{font-family:inherit}
+.hidden{display:none!important}
+.grid-bg{min-height:100vh;background-color:#e7e5e1;background-size:40px 40px;background-image:linear-gradient(to right,rgba(0,0,0,.02) 1px,transparent 1px),linear-gradient(to bottom,rgba(0,0,0,.02) 1px,transparent 1px);animation:moveGrid 30s linear infinite;position:relative}
+@keyframes moveGrid{to{background-position:40px 40px}}
+#math-bg{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.sym{position:absolute;bottom:-10vh;font-weight:800;color:#000;opacity:0;user-select:none;animation:floatUp linear infinite}
+@keyframes floatUp{0%{transform:translateY(0) rotate(0);opacity:0}10%,90%{opacity:.06}100%{transform:translateY(-120vh) rotate(360deg);opacity:0}}
+
+/* login */
+#login{display:flex;align-items:center;justify-content:center;padding:16px}
+.glass{background:rgba(255,255,255,.5);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(0,0,0,.05);border-radius:16px;padding:40px;width:100%;max-width:420px;position:relative;z-index:1}
+.glass h2{margin:0 0 4px;text-align:center;font-size:28px;font-weight:800}
+.glass .sub{margin:0 0 24px;text-align:center;color:#78716c;font-size:14px}
+.glass label{display:block;font-size:14px;font-weight:500;color:#57534e;margin-bottom:4px}
+.glass input{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(0,0,0,.1);background:rgba(255,255,255,.7);margin-bottom:16px;font-size:16px}
+.glass input:focus{outline:none;border-color:#78716c;background:#fff}
+.err{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:10px;border-radius:8px;text-align:center;font-size:14px;margin-bottom:16px}
+
+/* toolbar */
+#app{padding:16px}
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto}
+.toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;background:rgba(255,255,255,.75);backdrop-filter:blur(8px);border:1px solid #e5e7eb;border-radius:8px;padding:14px 18px;margin-bottom:20px}
+.toolbar h1{margin:0;font-size:20px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:6px;border:1px solid #d6d3d1;background:#fff;color:#44403c;font-weight:600;font-size:14px;cursor:pointer}
+.btn:hover{background:#f5f5f4}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.blue{background:#eff6ff;border-color:#bfdbfe;color:#2563eb}
+.btn.green{background:#16a34a;border-color:#16a34a;color:#fff}.btn.green:hover{background:#15803d}
+.btn.dark{background:#44403c;border-color:#44403c;color:#fff}.btn.dark:hover{background:#292524}
+.btn svg{width:16px;height:16px}
+#toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:99;padding:14px 22px;border-radius:8px;font-weight:700;border:1px solid;box-shadow:0 10px 25px rgba(0,0,0,.15)}
+#toast.ok{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+#toast.bad{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+
+/* invoice sheet */
+#invoice{background:#fff;box-shadow:0 20px 40px rgba(0,0,0,.12);padding:32px;border-radius:2px;min-height:29.7cm;display:flex;flex-direction:column}
+#invoice h2.title{margin:0 0 12px;font-size:40px;font-weight:800;letter-spacing:-.02em}
+.head{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #e7e5e4;padding-bottom:22px;margin-bottom:28px}
+.seller{flex:1}
+.seller .n{font-size:24px;font-weight:800}
+.seller .l{font-size:19px;font-weight:700;color:#57534e;margin-top:4px}
+.meta{flex:1;background:#fafaf9;border:1px solid #f5f5f4;border-radius:8px;padding:18px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.row:last-child{margin-bottom:0}
+.row .k{color:#6b7280;font-weight:700;font-size:18px;text-transform:uppercase;white-space:nowrap}
+.field{border:none;background:transparent;font-weight:700;color:#111827;font-size:18px;text-align:right;padding:2px 4px;min-width:0}
+.field:focus,[contenteditable]:focus{outline:2px solid #a8a29e;background:#fafaf9;border-radius:4px}
+.dwrap{position:relative;display:flex;align-items:center}
+.dwrap .field{width:130px}
+.cal{background:none;border:none;color:#9ca3af;cursor:pointer;padding:2px}
+.cal svg{width:15px;height:15px}
+.dp{position:absolute;opacity:0;width:1px;height:1px;right:0;bottom:0;pointer-events:none}
+.stu{background:#fafaf9;border:1px solid #e7e5e4;border-radius:8px;padding:18px;margin-bottom:28px}
+.stu h3{margin:0 0 8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#a8a29e}
+.stu .field{display:block;width:100%;text-align:left;font-size:24px;padding:10px;border-bottom:2px solid transparent}
+.stu .field:hover{border-bottom-color:#e7e5e4}
+.search{position:relative}
+#dropdown{position:absolute;left:0;right:0;top:100%;z-index:50;background:#fff;border:1px solid #e7e5e4;border-radius:6px;box-shadow:0 10px 25px rgba(0,0,0,.12);max-height:240px;overflow:auto}
+#dropdown .it{padding:10px 14px;border-bottom:1px solid #f5f5f4;cursor:pointer}
+#dropdown .it:hover{background:#f5f5f4}
+#dropdown .it b{font-size:16px}#dropdown .it small{color:#9ca3af}
+#dropdown .it div{font-size:12px;color:#6b7280}
+#dropdown .none{padding:12px;text-align:center;color:#6b7280;font-size:14px}
+table{width:100%;border-collapse:collapse}
+.tw{border:1px solid #e7e5e4;border-radius:8px;overflow:hidden}
+thead tr{background:#292524;color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+th{padding:12px 10px;text-align:left;border-right:1px solid #44403c}
+th.c{text-align:center}th.r{text-align:right}
+td{border-right:1px solid #e7e5e4;border-top:1px solid #e7e5e4;padding:6px}
+tbody tr:nth-child(even){background:#fafaf9}
+td input{width:100%;border:none;background:transparent;font-weight:700;font-size:20px;padding:8px}
+td input:focus{outline:2px solid #a8a29e;border-radius:4px;background:#fafaf9}
+td .amt{text-align:right;font-weight:700;font-size:20px;padding-right:10px;white-space:nowrap}
+.del{background:none;border:none;color:#d1d5db;cursor:pointer;padding:6px;border-radius:50%}
+.del:hover{color:#ef4444}
+.add{margin-top:14px;background:none;border:1px dashed #d6d3d1;color:#57534e;font-weight:600;padding:8px 16px;border-radius:6px;cursor:pointer}
+.add:hover{background:#e7e5e4}
+.totals{display:flex;justify-content:flex-end;margin-top:40px}
+.tbox{width:50%;min-width:300px;background:#292524;color:#fff;border-radius:8px;padding:30px;box-shadow:0 10px 25px rgba(0,0,0,.2)}
+.tbox .l{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid #57534e;font-size:15px}
+.tbox .disc input{width:56px;background:transparent;border:1px solid #57534e;border-radius:4px;color:#f87171;font-weight:600;padding:3px 6px;margin:0 4px 0 12px}
+.tbox .grand{display:flex;justify-content:space-between;font-size:40px;font-weight:700}
+.foot{margin-top:auto;padding-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.foot h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;color:#374151}
+.box{min-height:140px;background:#f5f5f4;border:1px solid #d6d3d1;border-radius:8px;padding:16px;font-size:14px;font-weight:700;white-space:pre-wrap}
+.box.mono{font-family:ui-monospace,Menlo,monospace}
+
+@media(max-width:760px){.head,.foot{flex-direction:column;grid-template-columns:1fr}#invoice{padding:16px}.tbox{width:100%}}
+@media print{
+  @page{size:A4;margin:0}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body,html{background:#fff}
+  body *{visibility:hidden}
+  #invoice,#invoice *{visibility:visible}
+  #invoice{position:absolute;left:0;top:0;width:210mm;min-height:297mm;box-shadow:none;padding:10mm;font-size:11pt}
+  .noprint,[data-noprint]{display:none!important}
+  .field,td input,.tbox .disc input{border:none!important;background:transparent!important}
+  .tbox .disc input{color:#f87171!important}
+  .foot,table,tr{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg" id="bg">
+  <div id="math-bg" data-html2canvas-ignore="true"></div>
+
+  <!-- LOGIN -->
+  <div id="login" style="min-height:100vh;display:flex">
+    <div class="glass">
+      <h2>System Login</h2>
+      <p class="sub">EDU-ikh | Invoice</p>
+      <div id="login-err" class="err hidden">Username ឬ Password មិនត្រឹមត្រូវទេ!</div>
+      <form id="login-form" autocomplete="on">
+        <label for="u">Username</label><input id="u" type="text" autocomplete="username" required>
+        <label for="p">Password</label><input id="p" type="password" autocomplete="current-password" required>
+        <button class="btn dark" style="width:100%;justify-content:center;padding:12px" type="submit">Access System</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app" class="hidden">
+    <div id="toast" class="hidden"></div>
+    <div class="wrap">
+      <div class="toolbar noprint">
+        <h1>Invoice Dashboard</h1>
+        <div class="btns">
+          <button class="btn blue" id="b-sync">⟳ <span>Sync Data</span></button>
+          <button class="btn" id="b-new">＋ New Invoice</button>
+          <button class="btn green" id="b-save">Save to Sheets</button>
+          <button class="btn" id="b-img">Save Image</button>
+          <button class="btn dark" id="b-print">Print / PDF</button>
+          <button class="btn" id="b-out">ចាកចេញ</button>
+        </div>
+      </div>
+
+      <div id="invoice">
+        <h2 class="title">INVOICE</h2>
+        <div class="head">
+          <div class="seller">
+            <div class="n">EDU-ikh | Home &amp; Online Tutoring</div>
+            <div class="l">www.edu-ikh.com</div>
+            <div class="l">Tel: 096 96 40 573 | 069 333 481</div>
+          </div>
+          <div class="meta">
+            <div class="row"><span class="k">Invoice No</span><input class="field" id="f-num" readonly style="width:260px"></div>
+            <div class="row"><span class="k">Date</span><div class="dwrap"><input class="field" id="f-date"><span data-html2canvas-ignore="true" data-noprint><button class="cal" data-pick="f-date" type="button">📅</button><input class="dp" type="date" data-for="f-date"></span></div></div>
+            <div class="row"><span class="k">Validity</span>
+              <div style="display:flex;align-items:center">
+                <div class="dwrap"><input class="field" id="f-vs"><span data-html2canvas-ignore="true" data-noprint><button class="cal" data-pick="f-vs" type="button">📅</button><input class="dp" type="date" data-for="f-vs"></span></div>
+                <span style="color:#9ca3af;margin:0 4px">⇨</span>
+                <div class="dwrap"><input class="field" id="f-due"><span data-html2canvas-ignore="true" data-noprint><button class="cal" data-pick="f-due" type="button">📅</button><input class="dp" type="date" data-for="f-due"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stu">
+          <h3>Student Info</h3>
+          <div class="search">
+            <input class="field" id="f-search" placeholder="🔍 Search Student Name..." autocomplete="off">
+            <div id="dropdown" class="hidden noprint" data-html2canvas-ignore="true"></div>
+          </div>
+          <input class="field" id="f-addr" placeholder="Student Location">
+          <input class="field" id="f-phone" placeholder="Phone Number">
+        </div>
+
+        <div>
+          <div class="tw"><table>
+            <thead><tr>
+              <th>Description / Subject</th><th class="c" style="width:100px">Time In</th><th class="c" style="width:100px">Time Out</th>
+              <th class="c" style="width:80px">QTY</th><th class="r" style="width:140px">Unit Price / Month</th><th class="r" style="width:130px">Amount</th>
+              <th data-html2canvas-ignore="true" data-noprint style="width:40px"></th>
+            </tr></thead>
+            <tbody id="items"></tbody>
+          </table></div>
+          <button class="add noprint" id="b-add" data-html2canvas-ignore="true">＋ Add Item</button>
+        </div>
+
+        <div class="totals"><div class="tbox">
+          <div class="l"><span>Subtotal</span><b id="t-sub"></b></div>
+          <div class="l disc"><span style="display:flex;align-items:center">Discount
+              <span data-html2canvas-ignore="true" data-noprint><input type="number" id="f-disc" min="0" max="100" value="0">%</span>
+              <span id="t-disc-pct" style="margin-left:8px"></span></span>
+            <b id="t-disc" style="color:#f87171"></b></div>
+          <div class="grand"><span>Total</span><span id="t-grand"></span></div>
+        </div></div>
+
+        <div class="foot">
+          <div><h4>Thank You For choosing</h4><div class="box" id="f-note" contenteditable spellcheck="false"></div></div>
+          <div><h4>Bank Transfer Info</h4><div class="box mono" id="f-pay" contenteditable spellcheck="false"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ================= CONFIG ================= */
+const CFG = {
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby5IpuygMm8vw2g2P9a8qqHFYNpft4UFtW1YpIpSlaM8xYFtksSbtZ0uKPnZFARQrls/exec',
+  // SHA-256 of "username:password" (no plain-text password in the page)
+  LOGIN_HASH: 'dda5e068edb63a61b46ed234003dc5d2107e3861959cdd1b97f47f4d8c3b906e',
+  SESSION_KEY: 'edu_ikh_logged_in',
+  SEQ_KEY: 'edu_ikh_invoice_seq_v2',
+  DEFAULT_SEQ: 1221,
+  CURRENCY: '$',
+  DEFAULT_NOTE: 'Thank you for choosing services and products from:\nEDU-ikh | Home & Online Tutoring. We are committed to your success!',
+  DEFAULT_PAY: 'ABA Name : CHEANG SOKKONG\nAccount Number : 000 738 752'
+};
+
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => CFG.CURRENCY + ' ' + (Number(n) || 0).toFixed(2);
+
+/* ================= STATE ================= */
+const today = fmtDate(new Date());
+const state = {
+  number: 'Loading...', date: today, vs: today, due: today,
+  name: '', addr: '', phone: '', discount: 0,
+  items: [newItem()],
+  students: [], syncing: false, saving: false
+};
+function newItem(o) {
+  return Object.assign({ id: Date.now() + Math.random(), desc: 'Math-CSCA', tin: '02:00', tout: '03:00', qty: 1, price: 150 }, o || {});
+}
+function fmtDate(d) {
+  return String(d.getDate()).padStart(2,'0') + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + d.getFullYear();
+}
+function duration(a, b) {
+  if (!a || !b || a.indexOf(':') < 0 || b.indexOf(':') < 0) return 0;
+  const [h1, m1] = a.split(':').map(Number), [h2, m2] = b.split(':').map(Number);
+  if ([h1,m1,h2,m2].some(isNaN)) return 0;
+  let d = (h2*60+m2) - (h1*60+m1);
+  if (d < 0) d += 1440;
+  return parseFloat((d/60).toFixed(2));
+}
+
+/* ================= UI HELPERS ================= */
+let toastTimer;
+function toast(type, text, ms) {
+  const t = $('#toast');
+  t.className = type === 'ok' ? 'ok' : 'bad';
+  t.textContent = text;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.add('hidden'), ms || 3500);
+}
+
+function buildMathBg() {
+  const sy = ['∑','∫','π','∞','∆','√','θ','μ','Ω','≈','≠','≤','≥','E=mc²'];
+  const box = $('#math-bg');
+  for (let i = 0; i < 25; i++) {
+    const d = document.createElement('div');
+    d.className = 'sym';
+    d.textContent = sy[Math.floor(Math.random()*sy.length)];
+    d.style.left = Math.random()*100 + '%';
+    d.style.fontSize = (1 + Math.random()*2) + 'rem';
+    d.style.animationDuration = (15 + Math.random()*25) + 's';
+    d.style.animationDelay = (Math.random()*20) + 's';
+    box.appendChild(d);
+  }
+}
+
+/* ================= LOGIN ================= */
+async function sha256(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+$('#login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const err = $('#login-err');
+  try {
+    if (!window.crypto || !crypto.subtle) throw new Error('need https');
+    const h = await sha256($('#u').value + ':' + $('#p').value);
+    if (h === CFG.LOGIN_HASH) {
+      sessionStorage.setItem(CFG.SESSION_KEY, 'true');
+      err.classList.add('hidden');
+      enterApp();
+    } else { err.textContent = 'Username ឬ Password មិនត្រឹមត្រូវទេ!'; err.classList.remove('hidden'); }
+  } catch (x) {
+    err.textContent = 'សូមបើកគេហទំព័រតាមរយៈ https:// (ឧ. Vercel)'; err.classList.remove('hidden');
+  }
+});
+$('#b-out').addEventListener('click', () => {
+  sessionStorage.removeItem(CFG.SESSION_KEY);
+  $('#app').classList.add('hidden'); $('#login').classList.remove('hidden');
+  $('#u').value = ''; $('#p').value = '';
+});
+
+/* ================= DATA (Google Apps Script) ================= */
+function jsonp(url, timeout) {
+  return new Promise((resolve, reject) => {
+    const cb = '__edu_cb_' + Date.now();
+    const s = document.createElement('script');
+    const t = setTimeout(() => { cleanup(); reject(new Error('JSONP timeout')); }, timeout || 12000);
+    function cleanup() { clearTimeout(t); delete window[cb]; s.remove(); }
+    window[cb] = d => { cleanup(); resolve(d); };
+    s.onerror = () => { cleanup(); reject(new Error('JSONP load error')); };
+    s.src = url + (url.indexOf('?') < 0 ? '?' : '&') + 'callback=' + cb + '&_=' + Date.now();
+    document.head.appendChild(s);
+  });
+}
+async function loadRemote() {
+  // 1) normal fetch  2) JSONP fallback (works even if CORS header is missing, as long as doGet supports ?callback=)
+  try {
+    const r = await fetch(CFG.SCRIPT_URL, { redirect: 'follow' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  } catch (e1) {
+    console.warn('fetch failed, trying JSONP:', e1);
+    return await jsonp(CFG.SCRIPT_URL);
+  }
+}
+function localSeq() { return parseInt(localStorage.getItem(CFG.SEQ_KEY)) || CFG.DEFAULT_SEQ; }
+function makeNumber(seq) {
+  const n = new Date();
+  return 'INV-' + n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(seq).padStart(5,'0') + '-' + Math.floor(1000 + Math.random()*9000);
+}
+async function sync(opts) {
+  opts = opts || {};
+  if (state.syncing) return null;
+  state.syncing = true;
+  $('#b-sync span').textContent = 'Syncing...'; $('#b-sync').disabled = true;
+  let seq = localSeq();
+  try {
+    const data = await loadRemote();
+    if (data && data.nextSeq) seq = data.nextSeq;
+    if (data && Array.isArray(data.students)) {
+      state.students = data.students;
+      toast('ok', 'ទាញបានទិន្នន័យសិស្សជោគជ័យ (' + data.students.length + ' នាក់)');
+    }
+  } catch (e) {
+    console.error(e);
+    toast('bad', 'បរាជ័យក្នុងការទាញទិន្នន័យ — សូមពិនិត្យ Apps Script (Anyone) រួចចុច Sync Data ម្តងទៀត', 6000);
+  } finally {
+    state.syncing = false;
+    $('#b-sync span').textContent = 'Sync Data'; $('#b-sync').disabled = false;
+  }
+  if (opts.bump) seq++;
+  localStorage.setItem(CFG.SEQ_KEY, seq);
+  return makeNumber(seq);
+}
+
+async function saveToSheets() {
+  if (state.saving) return;
+  if (!state.name.trim() && !confirm('មិនទាន់បញ្ចូលឈ្មោះសិស្ស។ តើចង់រក្សាទុកដដែលឬទេ?')) return;
+  state.saving = true;
+  $('#b-save').disabled = true; $('#b-save').textContent = 'Saving...';
+  const t = totals(), now = new Date();
+  const payload = {
+    date: state.date, invoiceNumber: state.number,
+    buyerName: state.name || 'មិនបានបញ្ជាក់ឈ្មោះ',
+    buyerPhone: state.phone || 'មិនបានបញ្ជាក់លេខទូរស័ព្ទ',
+    buyerAddress: state.addr || 'មិនបានបញ្ជាក់ទីតាំង',
+    subtotal: t.sub.toFixed(2), discountRate: state.discount, grandTotal: t.grand.toFixed(2),
+    realTime: now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-US'),
+    validityStart: state.vs, dueDate: state.due,
+    subjects: state.items.map(i => i.desc || 'N/A').join(', '),
+    timeIns: state.items.map(i => i.tin || 'N/A').join(', '),
+    timeOuts: state.items.map(i => i.tout || 'N/A').join(', ')
+  };
+  try {
+    // no-cors: response is opaque, so "success" means the request was sent
+    await fetch(CFG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+    toast('ok', 'ជោគជ័យ! ទិន្នន័យត្រូវបានផ្ញើទៅរក្សាទុក។');
+  } catch (e) {
+    toast('bad', 'បរាជ័យ! មានបញ្ហាក្នុងការរក្សាទុក។');
+  } finally {
+    state.saving = false; $('#b-save').disabled = false; $('#b-save').textContent = 'Save to Sheets';
+  }
+}
+
+/* ================= CALC / RENDER ================= */
+function totals() {
+  const sub = state.items.reduce((a, i) => a + (Number(i.qty)||0) * (Number(i.price)||0), 0);
+  const disc = sub * (state.discount / 100);
+  return { sub, disc, grand: sub - disc };
+}
+function renderTotals() {
+  const t = totals();
+  $('#t-sub').textContent = money(t.sub);
+  $('#t-disc').textContent = '-' + money(t.disc);
+  $('#t-grand').textContent = money(t.grand);
+  $('#t-disc-pct').textContent = state.discount > 0 ? '(' + state.discount + '%)' : '';
+}
+function renderItems() {
+  $('#items').innerHTML = state.items.map(i => `
+    <tr data-id="${i.id}">
+      <td style="padding-left:12px"><input data-k="desc" value="${esc(i.desc)}" placeholder="Subject"></td>
+      <td><input data-k="tin" value="${esc(i.tin)}" placeholder="In" style="font-size:17px"></td>
+      <td><input data-k="tout" value="${esc(i.tout)}" placeholder="Out" style="font-size:17px"></td>
+      <td><input data-k="qty" type="number" min="0" step="0.1" value="${i.qty}" style="font-size:17px"></td>
+      <td><input data-k="price" type="number" min="0" value="${i.price}" style="text-align:right;font-size:17px"></td>
+      <td><div class="amt">${money(i.qty * i.price)}</div></td>
+      <td data-html2canvas-ignore="true" data-noprint style="text-align:center"><button class="del" data-del="${i.id}" title="Remove">🗑</button></td>
+    </tr>`).join('');
+  renderTotals();
+}
+function renderStudentFields() {
+  $('#f-search').value = state.name; $('#f-addr').value = state.addr; $('#f-phone').value = state.phone;
+}
+function renderAll() {
+  $('#f-num').value = state.number; $('#f-date').value = state.date; $('#f-vs').value = state.vs; $('#f-due').value = state.due;
+  $('#f-disc').value = state.discount;
+  renderStudentFields(); renderItems();
+}
+
+/* items table events (delegated; no re-render while typing => no lost focus) */
+$('#items').addEventListener('input', e => {
+  const inp = e.target, tr = inp.closest('tr'); if (!tr) return;
+  const item = state.items.find(i => String(i.id) === tr.dataset.id); if (!item) return;
+  const k = inp.dataset.k;
+  if (k === 'qty' || k === 'price') item[k] = Number(inp.value) || 0;
+  else item[k] = inp.value;
+  if (k === 'tin' || k === 'tout') {
+    const d = duration(item.tin, item.tout);
+    if (d > 0) { item.qty = d; $('[data-k="qty"]', tr).value = d; }
+  }
+  $('.amt', tr).textContent = money(item.qty * item.price);
+  renderTotals();
+});
+$('#items').addEventListener('click', e => {
+  const b = e.target.closest('[data-del]'); if (!b) return;
+  state.items = state.items.filter(i => String(i.id) !== b.dataset.del);
+  renderItems();
+});
+$('#b-add').addEventListener('click', () => {
+  state.items.push(newItem({ desc: '', tin: '', tout: '', qty: 0, price: 0 }));
+  renderItems();
+});
+
+/* header fields */
+[['f-date','date'],['f-vs','vs'],['f-due','due'],['f-addr','addr'],['f-phone','phone']].forEach(([id,k]) =>
+  $('#' + id).addEventListener('input', e => { state[k] = e.target.value; }));
+$('#f-disc').addEventListener('input', e => {
+  let v = Math.min(100, Math.max(0, Number(e.target.value) || 0));
+  state.discount = v; renderTotals();
+});
+$('#f-note').addEventListener('input', () => {});
+/* date pickers */
+$$('.cal').forEach(b => b.addEventListener('click', () => {
+  const dp = $('.dp[data-for="' + b.dataset.pick + '"]');
+  try { dp.showPicker ? dp.showPicker() : dp.click(); } catch (_) { dp.click(); }
+}));
+$$('.dp').forEach(dp => dp.addEventListener('change', () => {
+  if (!dp.value) return;
+  const [y,m,d] = dp.value.split('-');
+  const id = dp.dataset.for, val = d + '-' + m + '-' + y;
+  $('#' + id).value = val;
+  state[{ 'f-date':'date', 'f-vs':'vs', 'f-due':'due' }[id]] = val;
+}));
+
+/* student search */
+const dd = $('#dropdown'), search = $('#f-search');
+function matches() {
+  const q = state.name.trim().toLowerCase();
+  return state.students.filter(s => !q || [s.name, s.studentId, s.phone].some(v => String(v == null ? '' : v).toLowerCase().indexOf(q) >= 0));
+}
+function renderDropdown() {
+  let html;
+  if (!state.students.length) {
+    html = '<div class="none">' + (state.syncing ? 'កំពុងទាញទិន្នន័យ...' : 'មិនមានទិន្នន័យសិស្សទេ (សូមចុចប៊ូតុង Sync Data ខាងលើ)') + '</div>';
+  } else {
+    const list = matches();
+    html = list.length
+      ? list.map((s, idx) => `<div class="it" data-idx="${state.students.indexOf(s)}"><b>${esc(s.name)}</b> <small>(${esc(s.studentId)})</small><div>${esc(s.location)} | ${esc(s.subject)}</div></div>`).join('')
+      : '<div class="none">រកមិនឃើញសិស្សនេះទេ (វាយបញ្ចូលថ្មីបាន)</div>';
+  }
+  dd.innerHTML = html; dd.classList.remove('hidden');
+}
+search.addEventListener('input', () => { state.name = search.value; renderDropdown(); });
+search.addEventListener('focus', renderDropdown);
+search.addEventListener('blur', () => setTimeout(() => dd.classList.add('hidden'), 200));
+dd.addEventListener('mousedown', e => {
+  const it = e.target.closest('.it'); if (!it) return;
+  const s = state.students[Number(it.dataset.idx)]; if (!s) return;
+  state.name = s.name || ''; state.addr = s.location || ''; state.phone = s.phone || '';
+  state.items = [newItem({
+    desc: s.subject || '', tin: s.timeIn || '', tout: s.timeOut || '',
+    qty: duration(s.timeIn, s.timeOut) || 1, price: parseFloat(s.price) || 0
+  })];
+  dd.classList.add('hidden');
+  renderStudentFields(); renderItems();
+});
+
+/* ================= TOOLBAR ================= */
+$('#b-sync').addEventListener('click', () => { sync(); });
+$('#b-new').addEventListener('click', async () => {
+  state.number = 'Generating...'; $('#f-num').value = state.number;
+  const n = await sync({ bump: true });
+  Object.assign(state, { number: n, name: '', addr: '', phone: '', items: [newItem({ id: Date.now() })] });
+  renderAll();
+});
+$('#b-save').addEventListener('click', saveToSheets);
+$('#b-print').addEventListener('click', () => {
+  state.note = $('#f-note').innerText; state.pay = $('#f-pay').innerText;
+  window.print();
+});
+$('#b-img').addEventListener('click', async () => {
+  const btn = $('#b-img'), el = $('#invoice');
+  if (typeof html2canvas === 'undefined') { toast('bad', 'html2canvas មិនទាន់ load (សូមពិនិត្យអ៊ីនធឺណិត)'); return; }
+  btn.disabled = true; btn.textContent = 'Generating...';
+  try {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, windowWidth: 1400 });
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/jpeg', 0.92);
+    a.download = (state.name.trim() || 'Unknown_Student') + '-' + state.number + '.jpg';
+    a.click();
+  } catch (e) { toast('bad', 'Error generating image: ' + e.message, 4000); }
+  finally { btn.disabled = false; btn.textContent = 'Save Image'; }
+});
+
+/* ================= BOOT ================= */
+async function enterApp() {
+  $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+  $('#f-note').textContent = CFG.DEFAULT_NOTE; $('#f-pay').textContent = CFG.DEFAULT_PAY;
+  renderAll();
+  state.number = await sync(); $('#f-num').value = state.number;
+}
+buildMathBg();
+if (sessionStorage.getItem(CFG.SESSION_KEY) === 'true') enterApp();
+})();
+</script>
+</body>
+</html>
