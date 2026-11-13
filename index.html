@@ -51,7 +51,7 @@ input,textarea,button{font-family:inherit}
 #invoice h2.title{margin:0 0 10px;text-align:right;font-size:38px;font-weight:800;letter-spacing:-.02em}
 .head{display:flex;align-items:center;gap:28px;border-bottom:2px solid #e7e5e4;padding-bottom:22px;margin-bottom:28px}
 .seller{flex:none;display:flex;align-items:center}
-.seller .logo{height:200px;width:auto;flex:none}
+.seller .logo{height:200px;display:block;width:auto;flex:none}
 .seller .stxt{min-width:0}
 .seller .n{font-size:24px;font-weight:800}
 .seller .l{font-size:20px;font-weight:700;color:#57534e;margin-top:4px}
@@ -525,6 +525,7 @@ $('#b-img').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = 'Generating...';
   try {
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    syncLogo();
     const canvas = await html2canvas(el, {
       scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, windowWidth: 1400,
       // Khmer marks (above/below the base letter) get clipped inside <input>; draw plain text blocks instead
@@ -554,11 +555,23 @@ $('#b-img').addEventListener('click', async () => {
   finally { btn.disabled = false; btn.textContent = 'Save Image'; }
 });
 
+/* ===== logo height = height of the right column (title + details box) ===== */
+function syncLogo() {
+  const logo = $('.seller .logo'), right = $('.head .right');
+  if (!logo || !right || $('#app').classList.contains('hidden')) return;
+  for (let i = 0; i < 2; i++) logo.style.height = right.offsetHeight + 'px';
+}
+window.addEventListener('resize', syncLogo);
+window.addEventListener('beforeprint', syncLogo);
+window.addEventListener('load', syncLogo);
+$('.seller .logo').addEventListener('load', syncLogo);
+
 /* ================= BOOT ================= */
 async function enterApp() {
   $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
   $('#f-note').textContent = CFG.DEFAULT_NOTE; $('#f-pay').textContent = CFG.DEFAULT_PAY;
   renderAll();
+  syncLogo(); setTimeout(syncLogo, 300);
   state.number = await sync(); $('#f-num').value = state.number;
 }
 buildMathBg();
