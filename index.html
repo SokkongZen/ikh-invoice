@@ -102,13 +102,48 @@ td .amt{text-align:right;font-weight:700;font-size:20px;padding-right:10px;white
 .box{min-height:140px;background:#f5f5f4;border:1px solid #d6d3d1;border-radius:8px;padding:16px;font-size:14px;font-weight:700;white-space:pre-wrap}
 .box.mono{font-family:ui-monospace,Menlo,monospace}
 
+
+/* report */
+#report{background:#fff;box-shadow:0 20px 40px rgba(0,0,0,.12);padding:32px;border-radius:2px;min-height:60vh}
+.r-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.r-top h2{margin:0;font-size:26px;font-weight:800}
+.r-ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.r-ctl select{padding:8px 10px;border:1px solid #d6d3d1;border-radius:6px;background:#fff;font-size:14px;font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:22px}
+.kpi{background:#fafaf9;border:1px solid #e7e5e4;border-radius:8px;padding:14px 16px}
+.kpi small{display:block;color:#78716c;font-size:13px;font-weight:600}
+.kpi b{display:block;font-size:26px;font-weight:800;margin-top:2px}
+.kpi.g b{color:#15803d}.kpi.r b{color:#b45309}
+.chart{display:flex;align-items:flex-end;gap:8px;height:210px;border-bottom:1px solid #d6d3d1;padding:6px 4px 0;margin-bottom:6px}
+.col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;cursor:pointer;font-size:12px;color:#57534e;min-width:0}
+.col .stk{width:100%;display:flex;flex-direction:column;justify-content:flex-end;border-radius:4px 4px 0 0;overflow:hidden}
+.col .pd{background:#16a34a}.col .up{background:#d6d3d1}
+.col.on .up{background:#fbbf24}
+.col .v{margin-bottom:3px;font-weight:700;color:#292524}
+.labs{display:flex;gap:8px;padding:0 4px;margin-bottom:6px}
+.labs div{flex:1;text-align:center;font-size:12px;font-weight:600;color:#57534e}
+.labs div.on{color:#111;text-decoration:underline}
+.legend{font-size:12px;color:#57534e;display:flex;gap:14px;margin:4px 0 18px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+#r-table td,#r-table th{padding:9px 8px;border:none;border-top:1px solid #e7e5e4;font-size:15px;text-align:left;vertical-align:middle}
+#r-table th{background:#292524;color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.05em;border-top:none}
+#r-table td.n,#r-table th.n{text-align:right;white-space:nowrap}
+#r-table tr:nth-child(even) td{background:#fafaf9}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.chip.p{background:#dcfce7;color:#166534}.chip.u{background:#fef3c7;color:#92400e}
+.mini{border:1px solid #d6d3d1;background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer}
+.mini:hover{background:#f5f5f4}.mini.ok{background:#16a34a;border-color:#16a34a;color:#fff}.mini.ok:hover{background:#15803d}
+.empty{padding:28px;text-align:center;color:#78716c}
+body.report-mode .inv-only{display:none!important}
+body:not(.report-mode) .rpt-only{display:none!important}
 @media(max-width:760px){.head,.foot{flex-direction:column;grid-template-columns:1fr}#invoice{padding:16px}.tbox{width:100%}}
 @media print{
   @page{size:A4;margin:0}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body,html{background:#fff}
   body *{visibility:hidden}
-  #invoice,#invoice *{visibility:visible}
+  #invoice,#invoice *,#report,#report *{visibility:visible}
+  #report{position:absolute;left:0;top:0;width:210mm;box-shadow:none;padding:10mm}
   #invoice{position:absolute;left:0;top:0;width:210mm;min-height:297mm;box-shadow:none;padding:10mm;font-size:11pt}
   .noprint,[data-noprint]{display:none!important}
   .field,td input,.tbox .disc input{border:none!important;background:transparent!important}
@@ -142,11 +177,13 @@ td .amt{text-align:right;font-weight:700;font-size:20px;padding-right:10px;white
       <div class="toolbar noprint">
         <h1>Invoice Dashboard</h1>
         <div class="btns">
-          <button class="btn blue" id="b-sync">⟳ <span>Sync Data</span></button>
-          <button class="btn" id="b-new">＋ New Invoice</button>
-          <button class="btn green" id="b-save">Save to Sheets</button>
-          <button class="btn" id="b-img">Save Image</button>
-          <button class="btn dark" id="b-print">Print / PDF</button>
+          <button class="btn rpt-only" id="b-back">← វិក្កយបត្រ</button>
+          <button class="btn inv-only" id="b-report">របាយការណ៍ប្រចាំខែ</button>
+          <button class="btn blue inv-only" id="b-sync">⟳ <span>Sync Data</span></button>
+          <button class="btn inv-only" id="b-new">＋ New Invoice</button>
+          <button class="btn green inv-only" id="b-save">Save to Sheets</button>
+          <button class="btn inv-only" id="b-img">Save Image</button>
+          <button class="btn dark inv-only" id="b-print">Print / PDF</button>
           <button class="btn" id="b-out">ចាកចេញ</button>
         </div>
       </div>
@@ -209,6 +246,33 @@ td .amt{text-align:right;font-weight:700;font-size:20px;padding-right:10px;white
           <div><h4>Thank You For choosing</h4><div class="box" id="f-note" contenteditable spellcheck="false"></div></div>
           <div><h4>Bank Transfer Info</h4><div class="box mono" id="f-pay" contenteditable spellcheck="false"></div></div>
         </div>
+      </div>
+
+      <div id="report" class="hidden">
+        <div class="r-top">
+          <h2 id="r-title">របាយការណ៍ចំណូលប្រចាំខែ</h2>
+          <div class="r-ctl noprint">
+            <select id="r-year"></select>
+            <select id="r-month"></select>
+            <button class="btn" id="r-refresh">⟳ Refresh</button>
+            <button class="btn" id="r-csv">Export CSV</button>
+            <button class="btn dark" id="r-print">Print / PDF</button>
+          </div>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><small>វិក្កយបត្រសរុប (Invoiced)</small><b id="k-inv">$0.00</b></div>
+          <div class="kpi g"><small>បានទទួលប្រាក់ (Paid)</small><b id="k-paid">$0.00</b></div>
+          <div class="kpi r"><small>មិនទាន់ទូទាត់ (Unpaid)</small><b id="k-unpaid">$0.00</b></div>
+          <div class="kpi"><small>ចំនួនវិក្កយបត្រ</small><b id="k-count">0</b></div>
+        </div>
+        <div class="chart" id="r-chart"></div>
+        <div class="labs" id="r-labs"></div>
+        <div class="legend"><span><i style="background:#16a34a"></i>Paid</span><span><i style="background:#d6d3d1"></i>Unpaid</span><span>ចុចលើខែដើម្បីមើលលម្អិត</span></div>
+        <div style="overflow-x:auto"><table id="r-table">
+          <thead><tr><th>កាលបរិច្ឆេទ</th><th>សិស្ស</th><th>មុខវិជ្ជា</th><th class="n">សរុប</th><th>ស្ថានភាព</th><th class="noprint" data-noprint></th></tr></thead>
+          <tbody id="r-body"></tbody>
+        </table></div>
+        <div class="noprint" style="margin-top:14px;text-align:right"><button class="mini" id="r-allpaid">Mark all paid ក្នុងខែនេះ</button></div>
       </div>
     </div>
   </div>
@@ -305,7 +369,7 @@ $('#login-form').addEventListener('submit', async e => {
   }
 });
 $('#b-out').addEventListener('click', () => {
-  sessionStorage.removeItem(CFG.SESSION_KEY);
+  sessionStorage.removeItem(CFG.SESSION_KEY); setMode(false);
   $('#app').classList.add('hidden'); $('#login').classList.remove('hidden');
   $('#u').value = ''; $('#p').value = '';
 });
@@ -323,17 +387,19 @@ function jsonp(url, timeout) {
     document.head.appendChild(s);
   });
 }
-async function loadRemote() {
+async function remote(q) {
   // 1) normal fetch  2) JSONP fallback (works even if CORS header is missing, as long as doGet supports ?callback=)
+  const u = CFG.SCRIPT_URL + (q ? '?' + q : '');
   try {
-    const r = await fetch(CFG.SCRIPT_URL, { redirect: 'follow' });
+    const r = await fetch(u + (q ? '&' : '?') + '_=' + Date.now(), { redirect: 'follow' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return await r.json();
   } catch (e1) {
     console.warn('fetch failed, trying JSONP:', e1);
-    return await jsonp(CFG.SCRIPT_URL);
+    return await jsonp(u);
   }
 }
+const loadRemote = () => remote('');
 function localSeq() { return parseInt(localStorage.getItem(CFG.SEQ_KEY)) || CFG.DEFAULT_SEQ; }
 function makeNumber(seq) {
   const n = new Date();
@@ -559,10 +625,116 @@ $('#b-img').addEventListener('click', async () => {
   finally { btn.disabled = false; btn.textContent = 'Save Image'; }
 });
 
+/* ================= MONTHLY REPORT ================= */
+const MONTHS = ['មករា','កុម្ភៈ','មីនា','មេសា','ឧសភា','មិថុនា','កក្កដា','សីហា','កញ្ញា','តុលា','វិច្ឆិកា','ធ្នូ'];
+const rpt = { list: [], year: new Date().getFullYear(), month: new Date().getMonth() + 1, loaded: false };
+const usd = n => CFG.CURRENCY + (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function parseDMY(s) {
+  const m = /^(\d{1,2})-(\d{1,2})-(\d{4})/.exec(String(s || ''));
+  return m ? { d: +m[1], m: +m[2], y: +m[3] } : null;
+}
+function inMonth(i, y, m) { const d = parseDMY(i.date); return d && d.y === y && d.m === m; }
+
+function setMode(report) {
+  document.body.classList.toggle('report-mode', report);
+  $('#invoice').classList.toggle('hidden', report);
+  $('#report').classList.toggle('hidden', !report);
+  if (!report) syncLogo();
+}
+async function loadReport() {
+  const b = $('#r-refresh'); b.disabled = true; b.textContent = 'Loading...';
+  try {
+    const d = await remote('action=report');
+    if (!d || !Array.isArray(d.invoices)) throw new Error('no invoices (deploy the new Apps Script)');
+    rpt.list = d.invoices; rpt.loaded = true;
+  } catch (e) {
+    console.error(e);
+    toast('bad', 'ទាញរបាយការណ៍មិនបាន — សូម Deploy Apps Script ជំនាន់ថ្មី (Anyone) រួចចុច Refresh', 6000);
+  } finally { b.disabled = false; b.textContent = '⟳ Refresh'; }
+  renderReport();
+}
+function fillSelectors() {
+  const years = new Set([new Date().getFullYear()]);
+  rpt.list.forEach(i => { const d = parseDMY(i.date); if (d) years.add(d.y); });
+  const ys = Array.from(years).sort((a, b) => b - a);
+  if (ys.indexOf(rpt.year) < 0) rpt.year = ys[0];
+  $('#r-year').innerHTML = ys.map(y => '<option value="' + y + '"' + (y === rpt.year ? ' selected' : '') + '>' + y + '</option>').join('');
+  $('#r-month').innerHTML = MONTHS.map((n, k) => '<option value="' + (k + 1) + '"' + (k + 1 === rpt.month ? ' selected' : '') + '>' + n + '</option>').join('');
+}
+function renderReport() {
+  fillSelectors();
+  const y = rpt.year, m = rpt.month;
+  const tot = Array.from({ length: 12 }, () => ({ paid: 0, unpaid: 0 }));
+  rpt.list.forEach(i => {
+    const d = parseDMY(i.date); if (!d || d.y !== y) return;
+    tot[d.m - 1][i.paid ? 'paid' : 'unpaid'] += Number(i.total) || 0;
+  });
+  const max = Math.max(1, ...tot.map(t => t.paid + t.unpaid));
+  $('#r-chart').innerHTML = tot.map((t, k) => {
+    const sum = t.paid + t.unpaid, h = Math.round(sum / max * 160);
+    const hp = sum ? Math.round(h * t.paid / sum) : 0;
+    return '<div class="col' + (k + 1 === m ? ' on' : '') + '" data-m="' + (k + 1) + '"><div class="v">' + (sum ? Math.round(sum) : '') + '</div>' +
+      '<div class="stk" style="height:' + h + 'px"><div class="up" style="height:' + (h - hp) + 'px"></div><div class="pd" style="height:' + hp + 'px"></div></div></div>';
+  }).join('');
+  $('#r-labs').innerHTML = MONTHS.map((n, k) => '<div class="' + (k + 1 === m ? 'on' : '') + '">' + n + '</div>').join('');
+
+  const rows = rpt.list.filter(i => inMonth(i, y, m)).sort((a, b) => {
+    const da = parseDMY(a.date), db = parseDMY(b.date); return (da.d - db.d) || (a.row - b.row);
+  });
+  const paid = rows.filter(i => i.paid).reduce((a, i) => a + i.total, 0);
+  const all = rows.reduce((a, i) => a + i.total, 0);
+  $('#r-title').textContent = 'របាយការណ៍ចំណូលខែ ' + MONTHS[m - 1] + ' ' + y;
+  $('#k-inv').textContent = usd(all); $('#k-paid').textContent = usd(paid); $('#k-unpaid').textContent = usd(all - paid);
+  $('#k-count').textContent = rows.length + ' (' + rows.filter(i => i.paid).length + ' paid)';
+  $('#r-body').innerHTML = rows.length ? rows.map(i =>
+    '<tr><td>' + esc(i.date) + '</td><td>' + esc(i.name) + '</td><td>' + esc(i.subjects) + '</td><td class="n">' + usd(i.total) + '</td>' +
+    '<td><span class="chip ' + (i.paid ? 'p' : 'u') + '">' + (i.paid ? 'Paid' + (i.paidDate ? ' · ' + esc(i.paidDate) : '') : 'Unpaid') + '</span></td>' +
+    '<td class="noprint" data-noprint><button class="mini ' + (i.paid ? '' : 'ok') + '" data-row="' + i.row + '">' + (i.paid ? 'Undo' : 'Mark paid') + '</button></td></tr>'
+  ).join('') : '<tr><td colspan="6" class="empty">មិនមានវិក្កយបត្រក្នុងខែនេះទេ</td></tr>';
+  $('#r-allpaid').classList.toggle('hidden', !rows.some(i => !i.paid));
+}
+async function setPaid(items, paid) {
+  const today = fmtDate(new Date());
+  items.forEach(i => { i.paid = paid; i.paidDate = paid ? today : ''; });
+  renderReport();                                   // optimistic
+  try {
+    await fetch(CFG.SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'markPaid', paid: paid, items: items.map(i => ({ row: i.row, invoiceNumber: i.invoiceNo })) }) });
+    toast('ok', paid ? 'បានកត់ត្រាថា Paid' : 'បានដក Paid ចេញ');
+    setTimeout(loadReport, 1500);                   // confirm from the sheet
+  } catch (e) { toast('bad', 'កត់ត្រាមិនបាន សូមព្យាយាមម្តងទៀត'); loadReport(); }
+}
+function exportCsv() {
+  const rows = rpt.list.filter(i => inMonth(i, rpt.year, rpt.month));
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const out = [['Date','Invoice No','Student','Phone','Subjects','Subtotal','Discount %','Total','Paid','Paid Date'].map(q).join(',')]
+    .concat(rows.map(i => [i.date, i.invoiceNo, i.name, i.phone, i.subjects, i.subtotal, i.discount, i.total, i.paid ? 'Yes' : 'No', i.paidDate].map(q).join(',')));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff' + out.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'ikh-income-' + rpt.year + '-' + String(rpt.month).padStart(2, '0') + '.csv';
+  a.click();
+}
+$('#b-report').addEventListener('click', () => { setMode(true); if (!rpt.loaded) loadReport(); else renderReport(); });
+$('#b-back').addEventListener('click', () => setMode(false));
+$('#r-refresh').addEventListener('click', loadReport);
+$('#r-csv').addEventListener('click', exportCsv);
+$('#r-print').addEventListener('click', () => window.print());
+$('#r-year').addEventListener('change', e => { rpt.year = +e.target.value; renderReport(); });
+$('#r-month').addEventListener('change', e => { rpt.month = +e.target.value; renderReport(); });
+$('#r-chart').addEventListener('click', e => { const c = e.target.closest('.col'); if (c) { rpt.month = +c.dataset.m; renderReport(); } });
+$('#r-body').addEventListener('click', e => {
+  const b = e.target.closest('[data-row]'); if (!b) return;
+  const it = rpt.list.find(i => String(i.row) === b.dataset.row); if (it) setPaid([it], !it.paid);
+});
+$('#r-allpaid').addEventListener('click', () => {
+  const todo = rpt.list.filter(i => inMonth(i, rpt.year, rpt.month) && !i.paid);
+  if (todo.length && confirm('កត់ត្រាថា Paid ទាំង ' + todo.length + ' វិក្កយបត្រក្នុងខែនេះ?')) setPaid(todo, true);
+});
+
 /* ===== logo height = height of the right column (title + details box) ===== */
 function syncLogo() {
   const logo = $('.seller .logo'), right = $('.head .right');
-  if (!logo || !right || $('#app').classList.contains('hidden')) return;
+  if (!logo || !right || $('#app').classList.contains('hidden') || !right.offsetHeight) return;
   for (let i = 0; i < 2; i++) logo.style.height = right.offsetHeight + 'px';
 }
 window.addEventListener('resize', syncLogo);
