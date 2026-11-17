@@ -383,7 +383,6 @@ body:not(.report-mode):not(.study-mode) .rpt-only{display:none!important}
           <div class="loc" id="f-loc">
             <span class="pt" id="l-a" contenteditable="plaintext-only" spellcheck="false" data-lb="Grade" data-ph="Grade"></span>
             <span class="pt" id="l-b" contenteditable="plaintext-only" spellcheck="false" data-lb="Location" data-ph="Location (Online / At home)"></span>
-            <span class="pt" id="l-c" contenteditable="plaintext-only" spellcheck="false" data-lb="Subject" data-ph="Subject"></span>
             <span class="pt tg" id="l-t" contenteditable="plaintext-only" spellcheck="false" data-ph="1-to 1"></span>
           </div>
           <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><input class="field" id="f-phone" placeholder="Phone Number"></div>
@@ -737,15 +736,15 @@ function splitLoc(str) {
   const m = x.match(/\(([^()]*)\)\s*$/);
   if (m) { t = m[1].trim(); x = x.slice(0, m.index).trim(); }
   const p = x.split(/\s*[|\u00b7]\s*/).map(v => v.trim()).filter(Boolean);
-  return { a: p[0] || '', b: p[1] || '', c: p.slice(2).join(' | '), t: t };
+  return { a: p[0] || '', b: p[1] || '', t: t };      // a third part (old subject text) is no longer shown
 }
 function joinLoc() {
   const v = id => $('#' + id).textContent.replace(/[\r\n|]+/g, ' ').trim();
-  const t = v('l-t'), base = [v('l-a'), v('l-b'), v('l-c')].filter(Boolean).join(' | ');
+  const t = v('l-t'), base = [v('l-a'), v('l-b')].filter(Boolean).join(' | ');
   return base + (t ? (base ? ' ' : '') + '(' + t + ')' : '');
 }
 function locDots() {
-  const ids = ['l-a', 'l-b', 'l-c'];
+  const ids = ['l-a', 'l-b'];
   ids.forEach((id, k) => $('#' + id).classList.toggle('dot', ids.slice(k + 1).some(j => $('#' + j).textContent.trim() !== '') && $('#' + id).textContent.trim() !== ''));
 }
 $$('#f-loc .pt').forEach(el => {
@@ -754,7 +753,7 @@ $$('#f-loc .pt').forEach(el => {
 });
 function renderStudentFields() {
   $('#f-search').value = state.name; $('#f-phone').value = state.phone;
-  const L = splitLoc(state.addr); $('#l-a').textContent = L.a; $('#l-b').textContent = L.b; $('#l-c').textContent = L.c; $('#l-t').textContent = L.t; locDots();
+  const L = splitLoc(state.addr); $('#l-a').textContent = L.a; $('#l-b').textContent = L.b; $('#l-t').textContent = L.t; locDots();
 }
 function renderAll() {
   $('#f-num').value = state.number; $('#f-date').value = state.date; $('#f-vs').value = state.vs; $('#f-due').value = state.due;
