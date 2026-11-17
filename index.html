@@ -116,6 +116,11 @@ td .amt{text-align:right;font-weight:700;font-size:20px;padding-right:10px;white
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chp{border:1px solid #d6d3d1;border-radius:999px;background:#fff;padding:9px 16px;font-size:15px;font-weight:600;cursor:pointer;color:#44403c;min-height:40px}
 .chp.on{background:#292524;border-color:#292524;color:#fff}
+.s-find{position:relative;margin-top:8px}
+#s-dd{position:absolute;left:0;right:0;top:100%;z-index:50;background:#fff;border:1px solid #e7e5e4;border-radius:6px;box-shadow:0 10px 25px rgba(0,0,0,.12);max-height:260px;overflow:auto}
+#s-dd .it{padding:12px 14px;border-bottom:1px solid #f5f5f4;cursor:pointer;font-size:16px;font-weight:600}
+#s-dd .it:hover{background:#f5f5f4}
+#s-dd .none{padding:12px 14px;color:#6b7280;font-size:14px}
 .s-row{display:flex;gap:10px;flex-wrap:wrap}
 .s-row>div{flex:1 1 130px;min-width:0}
 .s-row>div.w{flex:2 1 200px}
@@ -386,7 +391,7 @@ body:not(.report-mode):not(.study-mode) .rpt-only{display:none!important}
           <div class="s-head"><h2>កត់ត្រាថ្ងៃនេះ</h2><span class="s-sub" id="s-today"></span></div>
           <span class="lab">សិស្ស</span>
           <div class="chips" id="s-stu"></div>
-          <div style="margin-top:8px"><input id="s-new" type="text" placeholder="ឬវាយឈ្មោះសិស្សថ្មី" autocomplete="off"></div>
+          <div class="s-find"><input id="s-new" type="text" placeholder="ស្វែងរកឈ្មោះសិស្ស ឬវាយឈ្មោះថ្មី" autocomplete="off"><div id="s-dd" class="hidden"></div></div>
           <span class="lab">មុខវិជ្ជា</span>
           <div class="chips" id="s-subj"></div>
           <span class="lab">ប្រភេទ</span>
@@ -953,18 +958,41 @@ const hasNum = e => e.a !== null && e.b !== null && e.b > 0;
 const mkey = d => d.y + '-' + String(d.m).padStart(2, '0');
 function dkey(s) { const d = parseDMY(s); return d ? d.y * 10000 + d.m * 100 + d.d : 0; }
 
-function studyNames() {
+function studyAllNames() {                       // every known name: invoices + study log
   const names = [];
   (state.students || []).forEach(x => { if (x.name && names.indexOf(x.name) < 0) names.push(x.name); });
   sl.entries.forEach(x => { if (x.student && names.indexOf(x.student) < 0) names.push(x.student); });
-  if (sl.student && names.indexOf(sl.student) < 0) names.push(sl.student);
   return names;
+}
+function studyNames() {                          // quick buttons: only students with an entry in the last 60 days, newest first
+  const lim = new Date(); lim.setDate(lim.getDate() - 60);
+  const min = lim.getFullYear() * 10000 + (lim.getMonth() + 1) * 100 + lim.getDate(), last = {};
+  sl.entries.forEach((x, i) => { const k = dkey(x.date); if (x.student && k >= min) last[x.student] = k * 100000 + i; });
+  const names = Object.keys(last).sort((p, q) => last[q] - last[p]);
+  if (sl.student && names.indexOf(sl.student) < 0) names.unshift(sl.student);
+  return names;
+}
+function renderStudyDropdown() {
+  const dd = $('#s-dd'), q = $('#s-new').value.trim().toLowerCase();
+  if (!q) { dd.classList.add('hidden'); return; }
+  const list = studyAllNames().filter(n => n.toLowerCase().indexOf(q) >= 0).slice(0, 20);
+  dd.innerHTML = list.length ? list.map(n => '<div class="it" data-pick="' + esc(n) + '">' + esc(n) + '</div>').join('')
+    : '<div class="none">រកមិនឃើញ — ឈ្មោះនេះនឹងត្រូវកត់ជាសិស្សថ្មី</div>';
+  dd.classList.remove('hidden');
+}
+function pickStudyStudent(name) {
+  sl.student = name; $('#s-new').value = ''; $('#s-dd').classList.add('hidden');
+  for (let i = sl.entries.length - 1; i >= 0; i--) if (sl.entries[i].student === name) {   // same subject/type as last time
+    if (SUBJECTS.indexOf(sl.entries[i].subject) >= 0) sl.subject = sl.entries[i].subject;
+    sl.type = sl.entries[i].type === 'E' ? 'E' : 'L'; break;
+  }
+  clearStudyMsg(); renderStudyForm();
 }
 function renderStudyForm() {
   const names = studyNames();
   $('#s-stu').innerHTML = names.length
     ? names.map(n => '<button type="button" class="chp' + (n === sl.student ? ' on' : '') + '" data-stu="' + esc(n) + '">' + esc(n) + '</button>').join('')
-    : '<span class="s-sub">មិនទាន់មានឈ្មោះសិស្ស — វាយឈ្មោះខាងក្រោម ឬចុច Sync Data ក្នុងទំព័រវិក្កយបត្រ</span>';
+    : '<span class="s-sub">សិស្សដែលទើបកត់ត្រានឹងបង្ហាញជាប៊ូតុងនៅទីនេះ — ស្វែងរកឈ្មោះខាងក្រោម</span>';
   $('#s-subj').innerHTML = SUBJECTS.map(n => '<button type="button" class="chp' + (n === sl.subject ? ' on' : '') + '" data-sub="' + n + '">' + n + '</button>').join('');
   $('#s-type').innerHTML = [['L', 'មេរៀន'], ['E', 'វិញ្ញាសា']].map(x => '<button type="button" class="chp' + (x[0] === sl.type ? ' on' : '') + '" data-type="' + x[0] + '">' + x[1] + '</button>').join('');
   const L = sl.type === 'L';
@@ -1109,16 +1137,11 @@ const clearStudyMsg = () => { $('#s-msg').textContent = ''; $('#s-ok').textConte
 $('#b-study').addEventListener('click', () => { setView('study'); renderStudy(); if (!sl.loaded) loadStudy(); });
 $('#s-refresh').addEventListener('click', loadStudy);
 $('#s-save').addEventListener('click', saveStudy);
-$('#s-stu').addEventListener('click', e => {
-  const b = e.target.closest('[data-stu]'); if (!b) return;
-  sl.student = b.dataset.stu; $('#s-new').value = '';
-  for (let i = sl.entries.length - 1; i >= 0; i--) if (sl.entries[i].student === sl.student) {   // same subject/type as last time
-    if (SUBJECTS.indexOf(sl.entries[i].subject) >= 0) sl.subject = sl.entries[i].subject;
-    sl.type = sl.entries[i].type === 'E' ? 'E' : 'L'; break;
-  }
-  clearStudyMsg(); renderStudyForm();
-});
-$('#s-new').addEventListener('input', () => { if ($('#s-new').value) { sl.student = ''; renderStudyForm(); } $('#s-msg').textContent = ''; });
+$('#s-stu').addEventListener('click', e => { const b = e.target.closest('[data-stu]'); if (b) pickStudyStudent(b.dataset.stu); });
+$('#s-new').addEventListener('input', () => { if ($('#s-new').value) { sl.student = ''; renderStudyForm(); } $('#s-msg').textContent = ''; renderStudyDropdown(); });
+$('#s-new').addEventListener('focus', renderStudyDropdown);
+$('#s-new').addEventListener('blur', () => setTimeout(() => $('#s-dd').classList.add('hidden'), 200));
+$('#s-dd').addEventListener('mousedown', e => { const it = e.target.closest('[data-pick]'); if (it) { e.preventDefault(); pickStudyStudent(it.dataset.pick); } });
 $('#s-subj').addEventListener('click', e => { const b = e.target.closest('[data-sub]'); if (b) { sl.subject = b.dataset.sub; clearStudyMsg(); renderStudyForm(); } });
 $('#s-type').addEventListener('click', e => { const b = e.target.closest('[data-type]'); if (b) { sl.type = b.dataset.type; clearStudyMsg(); renderStudyForm(); } });
 ['#s-title', '#s-a', '#s-b'].forEach(q => $(q).addEventListener('input', () => { $('#s-msg').textContent = ''; }));
