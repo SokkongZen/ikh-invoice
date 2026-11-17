@@ -128,12 +128,8 @@ function doGet(e) {
     var students = [], seen = {};
     for (var j = data.length - 1; j >= 0; j--) {
       var name = String(data[j][3] || '').trim();
-      if (!name) continue;
-      // one entry per student + phone + subject (newest invoice wins), so a student with
-      // several subjects keeps each subject's own validity/due dates
-      var key = [name, String(data[j][4] || '').trim(), String(data[j][11] || '').trim()].join('|').toLowerCase();
-      if (seen[key]) continue;
-      seen[key] = true;
+      if (!name || seen[name.toLowerCase()]) continue;
+      seen[name.toLowerCase()] = true;
       students.push({
         studentId: 'S-' + (FIRST_DATA_ROW + j),
         name: name,
@@ -143,9 +139,7 @@ function doGet(e) {
         discount: num_(data[j][7]),
         subject: String(data[j][11] || ''),
         timeIn: String(data[j][12] || ''),
-        timeOut: String(data[j][13] || ''),
-        validityStart: String(data[j][9] || ''),
-        dueDate: String(data[j][10] || '')
+        timeOut: String(data[j][13] || '')
       });
     }
     return output_({ nextSeq: BASE_SEQ + data.length, students: students }, e);

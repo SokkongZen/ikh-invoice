@@ -635,7 +635,7 @@ $$('.dp').forEach(dp => dp.addEventListener('change', () => {
 const dd = $('#dropdown'), search = $('#f-search');
 function matches() {
   const q = state.name.trim().toLowerCase();
-  return state.students.filter(s => !q || [s.name, s.studentId, s.phone, s.subject].some(v => String(v == null ? '' : v).toLowerCase().indexOf(q) >= 0));
+  return state.students.filter(s => !q || [s.name, s.studentId, s.phone].some(v => String(v == null ? '' : v).toLowerCase().indexOf(q) >= 0));
 }
 function renderDropdown() {
   let html;
@@ -644,7 +644,7 @@ function renderDropdown() {
   } else {
     const list = matches();
     html = list.length
-      ? list.map((s, idx) => `<div class="it" data-idx="${state.students.indexOf(s)}"><b>${esc(s.name)}</b> <small>(${esc(s.studentId)})</small><div>${esc(s.location)} | ${esc(s.subject)}${Number(s.discount) > 0 ? ' | ' + esc(s.discount) + '% off' : ''}${s.dueDate ? ' | due ' + esc(s.dueDate) : ''}</div></div>`).join('')
+      ? list.map((s, idx) => `<div class="it" data-idx="${state.students.indexOf(s)}"><b>${esc(s.name)}</b> <small>(${esc(s.studentId)})</small><div>${esc(s.location)} | ${esc(s.subject)}${Number(s.discount) > 0 ? ' | ' + esc(s.discount) + '% off' : ''}</div></div>`).join('')
       : '<div class="none">រកមិនឃើញសិស្សនេះទេ (វាយបញ្ចូលថ្មីបាន)</div>';
   }
   dd.innerHTML = html; dd.classList.remove('hidden');
@@ -661,20 +661,9 @@ dd.addEventListener('mousedown', e => {
     qty: duration(s.timeIn, s.timeOut) || 1, price: parseFloat(s.price) || 0
   })];
   if (s.discount !== undefined) { state.discount = Math.min(100, Math.max(0, Number(s.discount) || 0)); $('#f-disc').value = state.discount; }
-  // renewal: this subject's next cycle starts on its previous due date and runs one month
-  const pd = parseDMY(s.dueDate);
-  if (pd) {
-    const a = new Date(pd.y, pd.m - 1, pd.d), b = addMonthClamped(a);
-    state.vs = fmtDate(a); state.due = fmtDate(b);
-  } else { state.vs = today; state.due = today; }   // no previous due date (older rows): start from today
-  $('#f-vs').value = state.vs; $('#f-due').value = state.due;
   dd.classList.add('hidden');
   renderStudentFields(); renderItems();
 });
-function addMonthClamped(d) {                  // 31 Jan -> 28/29 Feb, 8 Nov -> 8 Dec
-  const last = new Date(d.getFullYear(), d.getMonth() + 2, 0).getDate();
-  return new Date(d.getFullYear(), d.getMonth() + 1, Math.min(d.getDate(), last));
-}
 
 /* ================= TOOLBAR ================= */
 $('#b-sync').addEventListener('click', () => { sync(); });
