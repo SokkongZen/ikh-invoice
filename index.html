@@ -1023,7 +1023,7 @@ function renderStudyReport() {
     if (String(i.name || '').trim().toLowerCase() !== me || !me) return;
     const a = dkey(i.validityStart), z = dkey(i.dueDate); if (!a || !z || z < a) return;
     const k = 'P:' + a + '|' + z; if (seen[k]) return; seen[k] = 1;
-    opts.push({ k: k, a: a, z: z, label: i.validityStart + ' → ' + i.dueDate });
+    opts.push({ k: k, a: a, z: z, date: String(i.date || ''), label: i.validityStart + ' → ' + i.dueDate });
   });
   opts.sort((x, y) => y.a - x.a);
   const months = [cur];
@@ -1048,7 +1048,7 @@ function renderStudyReport() {
   const all = sl.entries.filter(e => e.student === sl.rs && inPeriod(e)).sort((a, b) => dkey(a.date) - dkey(b.date));
   const keepNote = ($('#srep .sr-nt') && $('#srep').dataset.k === sl.rs + '|' + sl.rm) ? $('#srep .sr-nt').innerText : '';
   const box = $('#srep'); box.dataset.k = sl.rs + '|' + sl.rm;
-  const head = '<div class="sr-hd"><div><h2>របាយការណ៍សិក្សាប្រចាំខែ</h2><div><b style="font-size:17px">' + esc(sl.rs || '—') + '</b> · ' + esc(per.a ? MONTHS[Math.floor(per.a / 100) % 100 - 1] + ' ' + Math.floor(per.a / 10000) : per.label) + '</div></div><img src="logo.png" alt=""></div>';
+  const head = '<div class="sr-hd"><div><h2>របាយការណ៍សិក្សាប្រចាំខែ</h2><div><b style="font-size:17px">' + esc(sl.rs || '—') + '</b> · ' + esc(per.a ? (per.date || per.label) : per.label) + '</div></div><img src="logo.png" alt=""></div>';
   const foot = '<div class="sr-ft"><span>EDU-ikh | Home &amp; Online Tutoring · www.edu-ikh.com</span><span>' + today + '</span></div>';
   if (!all.length) { box.innerHTML = head + '<div class="snone">មិនមានកំណត់ត្រាសម្រាប់សិស្សនេះក្នុងចន្លោះពេលនេះទេ</div>' + foot; return; }
   const Ls = all.filter(e => e.type !== 'E' && hasNum(e)), Es = all.filter(e => e.type === 'E' && hasNum(e));
