@@ -1019,8 +1019,10 @@ function renderStudyReport() {
   const now = new Date(), cur = 'M:' + mkey({ y: now.getFullYear(), m: now.getMonth() + 1 }), tk = dkey(today);
   const mname = k => MONTHS[Number(k.slice(7)) - 1] + ' ' + k.slice(2, 6);
   const opts = [], seen = {}, me = String(sl.rs).trim().toLowerCase();
+  let lastInv = '', lastK = 0;                                    // date of this student's newest invoice (shown under the title)
   (rpt.loaded ? rpt.list : sl.inv).forEach(i => {
     if (String(i.name || '').trim().toLowerCase() !== me || !me) return;
+    const dk = dkey(i.date); if (dk && dk >= lastK) { lastK = dk; lastInv = String(i.date); }
     const a = dkey(i.validityStart), z = dkey(i.dueDate); if (!a || !z || z < a) return;
     const k = 'P:' + a + '|' + z;
     if (seen[k]) { if (i.date) seen[k].date = String(i.date); return; }      // same Validity twice for this student: keep the later sheet row's date
@@ -1050,7 +1052,7 @@ function renderStudyReport() {
   const all = sl.entries.filter(e => e.student === sl.rs && inPeriod(e)).sort((a, b) => dkey(a.date) - dkey(b.date));
   const keepNote = ($('#srep .sr-nt') && $('#srep').dataset.k === sl.rs + '|' + sl.rm) ? $('#srep .sr-nt').innerText : '';
   const box = $('#srep'); box.dataset.k = sl.rs + '|' + sl.rm;
-  const head = '<div class="sr-hd"><div><h2>របាយការណ៍សិក្សាប្រចាំខែ</h2><div><b style="font-size:17px">' + esc(sl.rs || '—') + '</b> · ' + esc(per.a ? (per.date || per.label) : per.label) + '</div></div><img src="logo.png" alt=""></div>';
+  const head = '<div class="sr-hd"><div><h2>របាយការណ៍សិក្សាប្រចាំខែ</h2><div><b style="font-size:17px">' + esc(sl.rs || '—') + '</b> · ' + esc(lastInv || per.label) + '</div></div><img src="logo.png" alt=""></div>';
   const foot = '<div class="sr-ft"><span>EDU-ikh | Home &amp; Online Tutoring · www.edu-ikh.com</span><span>' + today + '</span></div>';
   if (!all.length) { box.innerHTML = head + '<div class="snone">មិនមានកំណត់ត្រាសម្រាប់សិស្សនេះក្នុងចន្លោះពេលនេះទេ</div>' + foot; return; }
   const Ls = all.filter(e => e.type !== 'E' && hasNum(e)), Es = all.filter(e => e.type === 'E' && hasNum(e));
