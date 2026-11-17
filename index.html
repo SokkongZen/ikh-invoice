@@ -1002,7 +1002,11 @@ function renderStudyReport() {
   sl.entries.forEach(e => { const d = parseDMY(e.date); if (d && months.indexOf('M:' + mkey(d)) < 0) months.push('M:' + mkey(d)); });
   months.sort().reverse().forEach(k => opts.push({ k: k, label: mname(k) }));
   if (!sl.rmUser || !opts.some(o => o.k === sl.rm)) {            // default: the newest invoice period that has started, else this month
-    const d = opts.find(o => o.a && o.a <= tk);
+    // tuition is prepaid: on renewal day the new period is still empty, so prefer the newest started period that has entries
+    const mine = sl.entries.filter(e => e.student === sl.rs).map(e => dkey(e.date));
+    const has = o => mine.some(k => o.a === o.z ? k === o.a : (k >= o.a && k < o.z));
+    const started = opts.filter(o => o.a && o.a <= tk);
+    const d = started.find(has) || started[0];
     sl.rm = d ? d.k : cur;
   }
   const per = opts.find(o => o.k === sl.rm);
@@ -1016,7 +1020,7 @@ function renderStudyReport() {
   const all = sl.entries.filter(e => e.student === sl.rs && inPeriod(e)).sort((a, b) => dkey(a.date) - dkey(b.date));
   const keepNote = ($('#srep .sr-nt') && $('#srep').dataset.k === sl.rs + '|' + sl.rm) ? $('#srep .sr-nt').innerText : '';
   const box = $('#srep'); box.dataset.k = sl.rs + '|' + sl.rm;
-  const head = '<div class="sr-hd"><div><h2>របាយការណ៍សិក្សាប្រចាំខែ</h2><div><b style="font-size:17px">' + esc(sl.rs || '—') + '</b> · ' + esc(per.label) + '</div></div><img src="logo.png" alt=""></div>';
+  const head = '<div class="sr-hd"><div><h2>របាយការណ៍សិក្សាប្រចាំខែ</h2><div><b style="font-size:17px">' + esc(sl.rs || '—') + '</b> · ' + esc(per.a ? MONTHS[Math.floor(per.a / 100) % 100 - 1] + ' ' + Math.floor(per.a / 10000) : per.label) + '</div></div><img src="logo.png" alt=""></div>';
   const foot = '<div class="sr-ft"><span>EDU-ikh | Home &amp; Online Tutoring · www.edu-ikh.com</span><span>' + today + '</span></div>';
   if (!all.length) { box.innerHTML = head + '<div class="snone">មិនមានកំណត់ត្រាសម្រាប់សិស្សនេះក្នុងចន្លោះពេលនេះទេ</div>' + foot; return; }
   const Ls = all.filter(e => e.type !== 'E' && hasNum(e)), Es = all.filter(e => e.type === 'E' && hasNum(e));
