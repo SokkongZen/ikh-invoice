@@ -1098,12 +1098,14 @@ function renderStudyReport() {
   const months = [cur];
   sl.entries.forEach(e => { const d = parseDMY(e.date); if (d && months.indexOf('M:' + mkey(d)) < 0) months.push('M:' + mkey(d)); });
   months.sort().reverse().forEach(k => opts.push({ k: k, label: mname(k) }));
-  if (!sl.rmUser || !opts.some(o => o.k === sl.rm)) {            // default: the newest invoice period that has started, else this month
+  if (!sl.rmUser || !opts.some(o => o.k === sl.rm)) {            // default: the newest finished invoice period (see below), else a started one, else this month
     // tuition is prepaid: on renewal day the new period is still empty, so prefer the newest started period that has entries
     const mine = sl.entries.filter(e => e.student === sl.rs).map(e => dkey(e.date));
     const has = o => mine.some(k => o.a === o.z ? k === o.a : (k >= o.a && k < o.z));
+    // the report covers a month that is finished: a newer invoice already exists (renewal issued) or its due date has passed
+    const inv = opts.filter(o => o.a), done = inv.find((o, i) => i > 0 || o.z <= tk);
     const started = opts.filter(o => o.a && o.a <= tk);
-    const d = started.find(has) || started[0];
+    const d = done || started.find(has) || started[0];
     sl.rm = d ? d.k : cur;
   }
   const per = opts.find(o => o.k === sl.rm);
