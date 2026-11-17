@@ -136,7 +136,8 @@ td .amt{text-align:right;font-weight:700;font-size:20px;padding-right:10px;white
 .sr-hd{display:flex;justify-content:space-between;gap:14px;border-bottom:2px solid #292524;padding-bottom:12px;margin-bottom:14px;align-items:flex-end}
 .sr-hd h2{margin:0;font-size:24px;font-weight:800}
 .sr-hd img{height:84px;width:auto}
-.sr-kp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.sr-kp{display:grid;grid-template-columns:minmax(0,1.7fr) repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.sr-k.per b{font-size:16px;white-space:nowrap}
 .sr-k{background:#f5f5f4;border-radius:6px;padding:8px 12px}
 .sr-k small{display:block;color:#78716c;font-size:12px}
 .sr-k b{font-size:20px;font-weight:800}
@@ -236,7 +237,7 @@ body:not(.report-mode):not(.study-mode) .rpt-only{display:none!important}
 
   #report{padding:14px;min-height:0}
   .scard{padding:14px}#srep{padding:14px}
-  .sr-kp{grid-template-columns:1fr 1fr}.sr-r{grid-template-columns:1fr;gap:0}.sr-hd img{height:56px}.sr-hd h2{font-size:19px}
+  .sr-kp{grid-template-columns:1fr 1fr 1fr}.sr-k.per{grid-column:1/-1}.sr-k{padding:8px}.sr-k b{font-size:17px}.sr-r{grid-template-columns:1fr;gap:0}.sr-hd img{height:56px}.sr-hd h2{font-size:19px}
   .sr-lg{font-size:12px}.sr-lg div{grid-template-columns:78px 50px 1fr 50px}
   .s-ctl .btn{flex:1 1 45%}
   .r-top h2{font-size:20px}
@@ -526,7 +527,7 @@ const getToken = () => {
   return Number(t.split('.')[0]) > Date.now() ? t : '';
 };
 function logout(msg) {
-  sessionStorage.removeItem(CFG.TOKEN_KEY); rpt.loaded = false; rpt.list = []; sl.loaded = false; sl.entries = []; sl.added = {}; sl.removed = {}; setMode(false);
+  sessionStorage.removeItem(CFG.TOKEN_KEY); rpt.loaded = false; rpt.list = []; sl.loaded = false; sl.entries = []; sl.inv = []; sl.added = {}; sl.removed = {}; setMode(false);
   $('#app').classList.add('hidden'); $('#login').classList.remove('hidden');
   $('#p').value = '';
   const err = $('#login-err');
@@ -945,7 +946,7 @@ $('#r-allpaid').addEventListener('click', () => {
 
 /* ================= STUDY LOG + MONTHLY STUDY REPORT ================= */
 const SUBJECTS = ['គណិត', 'រូប', 'គីមី', 'ខ្មែរ', 'ជីវ'];
-const sl = { entries: [], loaded: false, student: '', subject: '', type: 'L', saving: false, added: {}, removed: {}, rs: '', rm: '' };
+const sl = { inv: [], entries: [], loaded: false, student: '', subject: '', type: 'L', saving: false, added: {}, removed: {}, rs: '', rm: '' };
 const sid = () => 'S-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
 const hasNum = e => e.a !== null && e.b !== null && e.b > 0;
@@ -986,26 +987,42 @@ function renderStudyReport() {
   const names = []; sl.entries.forEach(e => { if (names.indexOf(e.student) < 0) names.push(e.student); });
   if (names.indexOf(sl.rs) < 0) sl.rs = (sl.student && names.indexOf(sl.student) >= 0) ? sl.student : (sl.entries.length ? sl.entries.slice().sort((x, y) => dkey(x.date) - dkey(y.date)).pop().student : '');
   $('#sr-stu').innerHTML = names.length ? names.map(n => '<option' + (n === sl.rs ? ' selected' : '') + '>' + esc(n) + '</option>').join('') : '<option value="">(គ្មានសិស្ស)</option>';
-  const now = new Date(), cur = mkey({ y: now.getFullYear(), m: now.getMonth() + 1 });
+  // period = Validity (start -> due) of this student's invoices; calendar months stay available as a fallback
+  const now = new Date(), cur = 'M:' + mkey({ y: now.getFullYear(), m: now.getMonth() + 1 }), tk = dkey(today);
+  const mname = k => MONTHS[Number(k.slice(7)) - 1] + ' ' + k.slice(2, 6);
+  const opts = [], seen = {}, me = String(sl.rs).trim().toLowerCase();
+  (rpt.loaded ? rpt.list : sl.inv).forEach(i => {
+    if (String(i.name || '').trim().toLowerCase() !== me || !me) return;
+    const a = dkey(i.validityStart), z = dkey(i.dueDate); if (!a || !z || z < a) return;
+    const k = 'P:' + a + '|' + z; if (seen[k]) return; seen[k] = 1;
+    opts.push({ k: k, a: a, z: z, label: i.validityStart + ' → ' + i.dueDate });
+  });
+  opts.sort((x, y) => y.a - x.a);
   const months = [cur];
-  sl.entries.forEach(e => { const d = parseDMY(e.date); if (d && months.indexOf(mkey(d)) < 0) months.push(mkey(d)); });
-  months.sort().reverse();
-  if (months.indexOf(sl.rm) < 0) sl.rm = cur;
-  const mname = k => MONTHS[Number(k.slice(5)) - 1] + ' ' + k.slice(0, 4);
-  $('#sr-month').innerHTML = months.map(k => '<option value="' + k + '"' + (k === sl.rm ? ' selected' : '') + '>' + mname(k) + '</option>').join('');
-
-  const all = sl.entries.filter(e => { const d = parseDMY(e.date); return e.student === sl.rs && d && mkey(d) === sl.rm; })
-    .sort((a, b) => dkey(a.date) - dkey(b.date));
+  sl.entries.forEach(e => { const d = parseDMY(e.date); if (d && months.indexOf('M:' + mkey(d)) < 0) months.push('M:' + mkey(d)); });
+  months.sort().reverse().forEach(k => opts.push({ k: k, label: mname(k) }));
+  if (!sl.rmUser || !opts.some(o => o.k === sl.rm)) {            // default: the newest invoice period that has started, else this month
+    const d = opts.find(o => o.a && o.a <= tk);
+    sl.rm = d ? d.k : cur;
+  }
+  const per = opts.find(o => o.k === sl.rm);
+  $('#sr-month').innerHTML = opts.map(o => '<option value="' + o.k + '"' + (o.k === sl.rm ? ' selected' : '') + '>' + esc(o.label) + '</option>').join('');
+  const inPeriod = e => {
+    const d = parseDMY(e.date); if (!d) return false;
+    if (!per.a) return 'M:' + mkey(d) === sl.rm;
+    const k = dkey(e.date);                         // due date itself belongs to the next period
+    return per.a === per.z ? k === per.a : (k >= per.a && k < per.z);
+  };
+  const all = sl.entries.filter(e => e.student === sl.rs && inPeriod(e)).sort((a, b) => dkey(a.date) - dkey(b.date));
   const keepNote = ($('#srep .sr-nt') && $('#srep').dataset.k === sl.rs + '|' + sl.rm) ? $('#srep .sr-nt').innerText : '';
   const box = $('#srep'); box.dataset.k = sl.rs + '|' + sl.rm;
-  const head = '<div class="sr-hd"><div><h2>របាយការណ៍សិក្សាប្រចាំខែ</h2><div><b style="font-size:17px">' + esc(sl.rs || '—') + '</b> · ' + mname(sl.rm) + '</div></div><img src="logo.png" alt=""></div>';
+  const head = '<div class="sr-hd"><div><h2>របាយការណ៍សិក្សាប្រចាំខែ</h2><div><b style="font-size:17px">' + esc(sl.rs || '—') + '</b> · ' + esc(per.label) + '</div></div><img src="logo.png" alt=""></div>';
   const foot = '<div class="sr-ft"><span>EDU-ikh | Home &amp; Online Tutoring · www.edu-ikh.com</span><span>' + today + '</span></div>';
-  if (!all.length) { box.innerHTML = head + '<div class="snone">មិនមានកំណត់ត្រាសម្រាប់សិស្សនេះក្នុងខែនេះទេ</div>' + foot; return; }
+  if (!all.length) { box.innerHTML = head + '<div class="snone">មិនមានកំណត់ត្រាសម្រាប់សិស្សនេះក្នុងចន្លោះពេលនេះទេ</div>' + foot; return; }
   const Ls = all.filter(e => e.type !== 'E' && hasNum(e)), Es = all.filter(e => e.type === 'E' && hasNum(e));
   const dn = Ls.reduce((x, e) => x + e.a, 0), tt = Ls.reduce((x, e) => x + e.b, 0);
-  const days = {}; all.forEach(e => { days[e.date] = 1; });
   const kp = '<div class="sr-kp">' +
-    '<div class="sr-k"><small>ថ្ងៃរៀន</small><b>' + Object.keys(days).length + '</b></div>' +
+    '<div class="sr-k per"><small>ចន្លោះពេល</small><b>' + esc(per.label) + '</b></div>' +
     '<div class="sr-k"><small>លំហាត់ធ្វើបាន</small><b>' + (tt ? dn + '/' + tt : '—') + '</b></div>' +
     '<div class="sr-k"><small>វិញ្ញាសាបានធ្វើ</small><b>' + (Es.length || '—') + '</b></div>' +
     '<div class="sr-k"><small>ពិន្ទុវិញ្ញាសាមធ្យម</small><b>' + (Es.length ? Math.round(Es.reduce((x, e) => x + pct(e.a, e.b), 0) / Es.length) + '%' : '—') + '</b></div></div>';
@@ -1036,6 +1053,7 @@ async function loadStudy() {
   try {
     const d = await remote('action=study');
     if (!d || !Array.isArray(d.entries)) throw new Error('deploy the new Apps Script');
+    if (!rpt.loaded) { try { const r = await remote('action=report'); if (r && Array.isArray(r.invoices)) sl.inv = r.invoices; } catch (_) {} }
     const nowT = Date.now();
     [sl.added, sl.removed].forEach(o => Object.keys(o).forEach(k => { if (nowT - o[k].t > 30000) delete o[k]; }));
     let L = d.entries.filter(e => !sl.removed[e.id]);       // writes take a moment to show up in the sheet
@@ -1066,6 +1084,7 @@ async function saveStudy() {
   try {
     await post({ action: 'saveStudy', entry: entry });
     sl.entries.push(entry); sl.added[entry.id] = { t: Date.now(), v: entry };
+    if (sl.rs !== name) { sl.rm = ''; sl.rmUser = false; }
     sl.student = name; sl.rs = name;
     ['#s-new', '#s-title', '#s-a', '#s-b', '#s-weak'].forEach(q => { $(q).value = ''; });
     $('#s-ok').textContent = 'បានរក្សាទុក ' + name + ' · ' + sl.subject;
@@ -1100,8 +1119,8 @@ $('#s-subj').addEventListener('click', e => { const b = e.target.closest('[data-
 $('#s-type').addEventListener('click', e => { const b = e.target.closest('[data-type]'); if (b) { sl.type = b.dataset.type; clearStudyMsg(); renderStudyForm(); } });
 ['#s-title', '#s-a', '#s-b'].forEach(q => $(q).addEventListener('input', () => { $('#s-msg').textContent = ''; }));
 $('#s-log').addEventListener('click', e => { const b = e.target.closest('[data-del]'); if (b) deleteStudy(b.dataset.del); });
-$('#sr-stu').addEventListener('change', e => { sl.rs = e.target.value; renderStudyReport(); });
-$('#sr-month').addEventListener('change', e => { sl.rm = e.target.value; renderStudyReport(); });
+$('#sr-stu').addEventListener('change', e => { sl.rs = e.target.value; sl.rm = ''; sl.rmUser = false; renderStudyReport(); });
+$('#sr-month').addEventListener('change', e => { sl.rm = e.target.value; sl.rmUser = true; renderStudyReport(); });
 $('#sr-detail').addEventListener('change', renderStudyReport);
 $('#sr-print').addEventListener('click', () => {
   const nt = $('#srep .sr-nt');
@@ -1120,7 +1139,7 @@ $('#sr-img').addEventListener('click', async () => {
       onclone: doc => { const st = doc.createElement('style'); st.textContent = '#srep *{letter-spacing:normal!important}#srep{box-shadow:none!important}'; doc.head.appendChild(st); } });
     const a = document.createElement('a');
     a.href = canvas.toDataURL('image/jpeg', 0.92);
-    a.download = (sl.rs || 'student') + '-study-' + sl.rm + '.jpg';
+    a.download = (sl.rs || 'student') + '-study-' + sl.rm.slice(2).replace('|', '_') + '.jpg';
     a.click();
   } catch (e) { toast('bad', 'Error generating image: ' + e.message, 4000); }
   finally { el.classList.remove('nonote'); btn.disabled = false; btn.textContent = 'Save Image'; }
