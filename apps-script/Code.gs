@@ -4,9 +4,10 @@
 // Columns: A Date | B Invoice No | C Saved At | D Student | E Phone | F Location
 //          G Subtotal | H Discount % | I Total | J Validity Start | K Due Date
 //          L Subjects | M Time In | N Time Out | O Paid | P Paid Date
+//          Q Unit Prices | R Qtys   (comma-joined, one value per subject row)
 var HEADERS = ['Date','Invoice No','Saved At','Student','Phone','Location',
                'Subtotal','Discount %','Total','Validity Start','Due Date',
-               'Subjects','Time In','Time Out','Paid','Paid Date'];
+               'Subjects','Time In','Time Out','Paid','Paid Date','Unit Prices','Qtys'];
 var FIRST_DATA_ROW = 2;
 var BASE_SEQ = 1221;
 var TZ = 'Asia/Phnom_Penh';
@@ -18,6 +19,9 @@ function getSheet_() {
     sheet.setFrozenRows(1);
   } else if (String(sheet.getRange(1, 15).getValue()) !== 'Paid') {
     sheet.getRange(1, 15, 1, 2).setValues([['Paid', 'Paid Date']]);
+  }
+  if (String(sheet.getRange(1, 17).getValue()) !== 'Unit Prices') {
+    sheet.getRange(1, 17, 1, 2).setValues([['Unit Prices', 'Qtys']]);
   }
   sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold').setBackground('#e7e5e4');
   return sheet;
@@ -203,7 +207,9 @@ function doGet(e) {
         discount: num_(data[j][7]),
         subject: String(data[j][11] || ''),
         timeIn: String(data[j][12] || ''),
-        timeOut: String(data[j][13] || '')
+        timeOut: String(data[j][13] || ''),
+        prices: String(data[j][16] || ''),
+        qtys: String(data[j][17] || '')
       });
     }
     return output_({ nextSeq: BASE_SEQ + data.length, students: students }, e);
@@ -250,8 +256,9 @@ function saveInvoice_(sheet, p) {
   if (!target) target = Math.max(last + 1, FIRST_DATA_ROW);
 
   sheet.getRange(target, 1, 1, 6).setNumberFormat('@');
-  sheet.getRange(target, 10, 1, 7).setNumberFormat('@');
+  sheet.getRange(target, 10, 1, 9).setNumberFormat('@');
   sheet.getRange(target, 1, 1, row.length).setValues([row]);
+  sheet.getRange(target, 17, 1, 2).setValues([[p.prices || '', p.qtys || '']]);   // Paid / Paid Date (O, P) stay untouched
   return json_({ ok: true, row: target });
 }
 

@@ -504,6 +504,9 @@ function itemsFromStudent(s) {
   const sp = v => String(v || '').split(',').map(x => x.trim()).map(x => x === 'N/A' ? '' : x);
   const subj = sp(s.subject), tin = sp(s.timeIn), tout = sp(s.timeOut), n = Math.max(subj.length, 1);
   const sub = parseFloat(s.price) || 0;
+  const pr = sp(s.prices), qt = sp(s.qtys);          // saved per-row price and qty (invoices saved after this update)
+  if (pr.length === subj.length && qt.length === subj.length && pr.every(v => v !== '' && !isNaN(Number(v))) && qt.every(v => v !== '' && !isNaN(Number(v))))
+    return subj.map((d, k) => newItem({ desc: d, tin: tin[k] || '', tout: tout[k] || '', qty: Number(qt[k]), price: Number(pr[k]) }));
   if (n === 1) return [newItem({ desc: subj[0] || '', tin: tin[0] || '', tout: tout[0] || '',
     qty: duration(tin[0], tout[0]) || 1, price: sub })];
   return subj.map((d, k) => {                       // old per-subject prices are not saved: split the old subtotal evenly, editable
@@ -671,7 +674,9 @@ async function saveToSheets() {
     validityStart: state.vs, dueDate: state.due,
     subjects: state.items.map(i => i.desc || 'N/A').join(', '),
     timeIns: state.items.map(i => i.tin || 'N/A').join(', '),
-    timeOuts: state.items.map(i => i.tout || 'N/A').join(', ')
+    timeOuts: state.items.map(i => i.tout || 'N/A').join(', '),
+    prices: state.items.map(i => Number(i.price) || 0).join(', '),
+    qtys: state.items.map(i => Number(i.qty) || 0).join(', ')
   };
   try {
     await post(payload);
