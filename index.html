@@ -499,6 +499,18 @@ const state = {
   items: [newItem()],
   students: [], syncing: false, saving: false
 };
+function itemsFromStudent(s) {
+  // the sheet stores subjects / times as "a, b, c": one invoice row per subject
+  const sp = v => String(v || '').split(',').map(x => x.trim()).map(x => x === 'N/A' ? '' : x);
+  const subj = sp(s.subject), tin = sp(s.timeIn), tout = sp(s.timeOut), n = Math.max(subj.length, 1);
+  const sub = parseFloat(s.price) || 0;
+  if (n === 1) return [newItem({ desc: subj[0] || '', tin: tin[0] || '', tout: tout[0] || '',
+    qty: duration(tin[0], tout[0]) || 1, price: sub })];
+  return subj.map((d, k) => {                       // old per-subject prices are not saved: split the old subtotal evenly, editable
+    const q = duration(tin[k], tout[k]) || 1;
+    return newItem({ desc: d, tin: tin[k] || '', tout: tout[k] || '', qty: q, price: Math.round(sub / n / q * 100) / 100 });
+  });
+}
 function newItem(o) {
   return Object.assign({ id: Date.now() + Math.random(), desc: 'Math-CSCA', tin: '02:00', tout: '03:00', qty: 1, price: 150 }, o || {});
 }
@@ -776,10 +788,7 @@ dd.addEventListener('mousedown', e => {
   const it = e.target.closest('.it'); if (!it) return;
   const s = state.students[Number(it.dataset.idx)]; if (!s) return;
   state.name = s.name || ''; state.addr = s.location || ''; state.phone = s.phone || '';
-  state.items = [newItem({
-    desc: s.subject || '', tin: s.timeIn || '', tout: s.timeOut || '',
-    qty: duration(s.timeIn, s.timeOut) || 1, price: parseFloat(s.price) || 0
-  })];
+  state.items = itemsFromStudent(s);
   if (s.discount !== undefined) { state.discount = Math.min(100, Math.max(0, Number(s.discount) || 0)); $('#f-disc').value = state.discount; }
   dd.classList.add('hidden');
   renderStudentFields(); renderItems();
