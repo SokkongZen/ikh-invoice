@@ -96,12 +96,76 @@ function login_(e) {
   return { ok: false, error: 'wrong' };
 }
 
+
+// ---------- STUDY LOG (daily lesson / exam-paper entries; separate tab, created automatically) ----------
+var STUDY_HEADERS = ['ID','Date','Student','Subject','Type','Title','A','B','Weakness','Saved At'];
+
+function studySheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName('StudyLog');
+  if (!sh) {
+    sh = ss.insertSheet('StudyLog');
+    sh.getRange(1, 1, 1, STUDY_HEADERS.length).setValues([STUDY_HEADERS]).setFontWeight('bold').setBackground('#e7e5e4');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function s_(v, max) { return String(v == null ? '' : v).replace(/[\r\n]+/g, ' ').trim().slice(0, max || 200); }
+
+function studyRowById_(sh, id) {
+  var last = sh.getLastRow();
+  if (last < 2 || !id) return 0;
+  var ids = sh.getRange(2, 1, last - 1, 1).getDisplayValues();
+  for (var i = 0; i < ids.length; i++) if (String(ids[i][0]) === String(id)) return 2 + i;
+  return 0;
+}
+
+function listStudy_() {
+  var sh = studySheet_(), last = sh.getLastRow(), out = [];
+  if (last >= 2) {
+    var start = Math.max(2, last - 2999);
+    sh.getRange(start, 1, last - start + 1, STUDY_HEADERS.length).getDisplayValues().forEach(function (r) {
+      if (!r[0]) return;
+      out.push({ id: r[0], date: r[1], student: r[2], subject: r[3], type: r[4] === 'E' ? 'E' : 'L', title: r[5],
+        a: r[6] === '' ? null : num_(r[6]), b: r[7] === '' ? null : num_(r[7]), weak: r[8] });
+    });
+  }
+  return { entries: out };
+}
+
+function saveStudy_(p) {
+  var x = p.entry || {};
+  if (!s_(x.id) || !s_(x.student) || !s_(x.subject) || !s_(x.title)) throw new Error('entry needs id, student, subject and title');
+  var hasNum = x.a !== null && x.a !== undefined && x.a !== '' && x.b !== null && x.b !== undefined && x.b !== '';
+  var a = hasNum ? Number(x.a) : '', b = hasNum ? Number(x.b) : '';
+  if (hasNum && (!(a >= 0) || !(b > 0) || a > b)) throw new Error('invalid numbers');
+  var type = x.type === 'E' ? 'E' : 'L';
+  if (type === 'E' && !hasNum) throw new Error('exam paper needs a score');
+  var sh = studySheet_();
+  var row = [s_(x.id, 60), s_(x.date, 20), s_(x.student, 80), s_(x.subject, 40), type, s_(x.title, 200), a, b, s_(x.weak, 200),
+             Utilities.formatDate(new Date(), TZ, 'dd-MM-yyyy HH:mm:ss')];
+  var t = studyRowById_(sh, row[0]) || Math.max(sh.getLastRow() + 1, 2);
+  sh.getRange(t, 1, 1, 6).setNumberFormat('@');
+  sh.getRange(t, 9, 1, 2).setNumberFormat('@');
+  sh.getRange(t, 1, 1, row.length).setValues([row]);
+  return json_({ ok: true, row: t });
+}
+
+function deleteStudy_(p) {
+  var sh = studySheet_(), row = studyRowById_(sh, p.id);
+  if (!row) return json_({ ok: false, error: 'entry not found' });
+  sh.deleteRow(row);
+  return json_({ ok: true });
+}
+
 // ---------- GET ----------
 function doGet(e) {
   try {
     var action = e && e.parameter && e.parameter.action;
     if (action === 'login') return output_(login_(e), e);
     if (!validToken_(e && e.parameter && e.parameter.token)) return output_({ error: 'unauthorized' }, e);
+    if (action === 'study') return output_(listStudy_(), e);
     var sheet = getSheet_();
     var data = readRows_(sheet);
 
@@ -155,6 +219,8 @@ function doPost(e) {
     lock.waitLock(20000);
     var p = JSON.parse(e.postData.contents);
     if (!validToken_(p.token)) return json_({ ok: false, error: 'unauthorized' });
+    if (p.action === 'saveStudy') return saveStudy_(p);
+    if (p.action === 'deleteStudy') return deleteStudy_(p);
     var sheet = getSheet_();
     if (p.action === 'markPaid') return markPaid_(sheet, p);
     return saveInvoice_(sheet, p);

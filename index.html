@@ -103,6 +103,59 @@ td .amt{text-align:right;font-weight:700;font-size:20px;padding-right:10px;white
 .box.mono{font-family:ui-monospace,Menlo,monospace}
 
 
+
+/* study log + monthly study report */
+#study{display:grid;gap:14px}
+.scard{background:#fff;box-shadow:0 10px 25px rgba(0,0,0,.08);border-radius:8px;padding:20px}
+.scard h2{margin:0;font-size:20px;font-weight:800}
+.s-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.s-sub{font-size:13px;color:#78716c}
+.scard .lab{display:block;font-size:12px;font-weight:600;color:#78716c;margin:14px 0 6px}
+.scard input[type=text],.scard input[type=number],.scard select{padding:10px 12px;border:1px solid #d6d3d1;border-radius:6px;background:#fff;font-size:16px;min-height:44px;min-width:0;width:100%}
+.scard input:focus,.scard select:focus{outline:2px solid #a8a29e}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chp{border:1px solid #d6d3d1;border-radius:999px;background:#fff;padding:9px 16px;font-size:15px;font-weight:600;cursor:pointer;color:#44403c;min-height:40px}
+.chp.on{background:#292524;border-color:#292524;color:#fff}
+.s-row{display:flex;gap:10px;flex-wrap:wrap}
+.s-row>div{flex:1 1 130px;min-width:0}
+.s-row>div.w{flex:2 1 200px}
+.s-msg{font-size:13px;color:#dc2626;min-height:18px;margin-top:8px}
+.s-ok{font-size:13px;color:#15803d;margin-left:10px}
+.sli{display:grid;grid-template-columns:1fr auto auto;gap:2px 12px;align-items:center;padding:10px 0;border-top:1px solid #e7e5e4;font-size:14px}
+.sli:first-child{border-top:none}
+.sli .a{grid-column:1}.sli .a b{font-weight:700}
+.sli .n{font-weight:700;white-space:nowrap}
+.sli small{color:#78716c;font-size:12px}
+.sdel{border:none;background:transparent;color:#a8a29e;font-size:20px;cursor:pointer;padding:6px 10px}
+.sdel:hover{color:#dc2626}
+.snone{padding:12px 0;color:#78716c;font-size:14px}
+.s-ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.s-ctl select{width:auto;flex:1 1 130px}
+.s-ctl label{font-size:14px;display:flex;align-items:center;gap:6px}
+#srep{background:#fff;color:#292524;box-shadow:0 10px 25px rgba(0,0,0,.08);border-radius:2px;padding:28px;font-size:14px;line-height:1.9;max-width:860px;width:100%;margin:0 auto}
+.sr-hd{display:flex;justify-content:space-between;gap:14px;border-bottom:2px solid #292524;padding-bottom:12px;margin-bottom:14px;align-items:flex-end}
+.sr-hd h2{margin:0;font-size:24px;font-weight:800}
+.sr-hd img{height:84px;width:auto}
+.sr-kp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.sr-k{background:#f5f5f4;border-radius:6px;padding:8px 12px}
+.sr-k small{display:block;color:#78716c;font-size:12px}
+.sr-k b{font-size:20px;font-weight:800}
+.sr-sj{border:1px solid #d6d3d1;border-radius:6px;margin-bottom:10px;overflow:hidden;page-break-inside:avoid}
+.sr-sh{background:#292524;color:#fff;padding:5px 12px;display:flex;justify-content:space-between;font-weight:700}
+.sr-bd{padding:8px 12px}
+.sr-r{display:grid;grid-template-columns:150px 1fr;gap:8px}
+.sr-r>span{color:#78716c;font-size:13px}
+.sr-bar{height:6px;border-radius:3px;background:#e7e5e4;overflow:hidden;margin:2px 0 6px}
+.sr-bar i{display:block;height:100%;background:#16a34a}
+.sr-lg{margin-top:6px;border-top:1px solid #e7e5e4;padding-top:4px;font-size:13px;color:#57534e}
+.sr-lg div{display:grid;grid-template-columns:86px 70px 1fr 70px;gap:6px}
+.sr-lg div span:last-child{text-align:right}
+.sr-nl{font-size:13px;color:#78716c;margin:10px 0 4px}
+.sr-nt{border:1px solid #d6d3d1;border-radius:6px;padding:8px 12px;min-height:44px;outline:none;white-space:pre-wrap}
+.sr-nt:empty:before{content:attr(data-ph);color:#a8a29e}
+.sr-ft{margin-top:12px;display:flex;justify-content:space-between;gap:10px;color:#78716c;font-size:12px}
+#srep.nonote .sr-nl,#srep.nonote .sr-nt{display:none}
+
 /* report */
 #report{background:#fff;box-shadow:0 20px 40px rgba(0,0,0,.12);padding:32px;border-radius:2px;min-height:60vh}
 .r-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px}
@@ -135,8 +188,8 @@ td .amt{text-align:right;font-weight:700;font-size:20px;padding-right:10px;white
 .mini{border:1px solid #d6d3d1;background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer}
 .mini:hover{background:#f5f5f4}.mini.ok{background:#16a34a;border-color:#16a34a;color:#fff}.mini.ok:hover{background:#15803d}
 .empty{padding:28px;text-align:center;color:#78716c}
-body.report-mode .inv-only{display:none!important}
-body:not(.report-mode) .rpt-only{display:none!important}
+body.report-mode .inv-only,body.study-mode .inv-only{display:none!important}
+body:not(.report-mode):not(.study-mode) .rpt-only{display:none!important}
 .labs .ls{display:none}
 @media screen and (max-width:760px){
   #app{padding:8px}
@@ -182,6 +235,10 @@ body:not(.report-mode) .rpt-only{display:none!important}
   .foot{grid-template-columns:1fr;padding-top:22px;gap:16px}
 
   #report{padding:14px;min-height:0}
+  .scard{padding:14px}#srep{padding:14px}
+  .sr-kp{grid-template-columns:1fr 1fr}.sr-r{grid-template-columns:1fr;gap:0}.sr-hd img{height:56px}.sr-hd h2{font-size:19px}
+  .sr-lg{font-size:12px}.sr-lg div{grid-template-columns:78px 50px 1fr 50px}
+  .s-ctl .btn{flex:1 1 45%}
   .r-top h2{font-size:20px}
   .r-ctl{width:100%}
   .r-ctl select{flex:1;min-height:44px;font-size:16px}
@@ -214,7 +271,10 @@ body:not(.report-mode) .rpt-only{display:none!important}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body,html{background:#fff}
   body *{visibility:hidden}
-  #invoice,#invoice *,#report,#report *{visibility:visible}
+  #invoice,#invoice *,#report,#report *,#srep,#srep *{visibility:visible}
+  #srep{position:absolute;left:0;top:0;width:210mm;max-width:none;box-shadow:none;padding:10mm}
+  #srep .sr-nt:empty,#srep .sr-nt:empty:before{display:none;content:none}
+  #srep.pnonote .sr-nl{display:none}
   #report{position:absolute;left:0;top:0;width:210mm;box-shadow:none;padding:10mm}
   #invoice{position:absolute;left:0;top:0;width:210mm;min-height:297mm;box-shadow:none;padding:10mm;font-size:11pt}
   .noprint,[data-noprint]{display:none!important}
@@ -249,6 +309,7 @@ body:not(.report-mode) .rpt-only{display:none!important}
         <h1>Invoice Dashboard</h1>
         <div class="btns">
           <button class="btn rpt-only" id="b-back">← វិក្កយបត្រ</button>
+          <button class="btn inv-only" id="b-study">កត់ត្រាសិក្សា</button>
           <button class="btn inv-only" id="b-report">របាយការណ៍ប្រចាំខែ</button>
           <button class="btn blue inv-only" id="b-sync">⟳ <span>Sync Data</span></button>
           <button class="btn inv-only" id="b-new">＋ New Invoice</button>
@@ -317,6 +378,46 @@ body:not(.report-mode) .rpt-only{display:none!important}
           <div><h4>Thank You For choosing</h4><div class="box" id="f-note" contenteditable spellcheck="false"></div></div>
           <div><h4>Bank Transfer Info</h4><div class="box mono" id="f-pay" contenteditable spellcheck="false"></div></div>
         </div>
+      </div>
+
+      <div id="study" class="hidden">
+        <div class="scard noprint">
+          <div class="s-head"><h2>កត់ត្រាថ្ងៃនេះ</h2><span class="s-sub" id="s-today"></span></div>
+          <span class="lab">សិស្ស</span>
+          <div class="chips" id="s-stu"></div>
+          <div style="margin-top:8px"><input id="s-new" type="text" placeholder="ឬវាយឈ្មោះសិស្សថ្មី" autocomplete="off"></div>
+          <span class="lab">មុខវិជ្ជា</span>
+          <div class="chips" id="s-subj"></div>
+          <span class="lab">ប្រភេទ</span>
+          <div class="chips" id="s-type"></div>
+          <label class="lab" for="s-title" id="s-l1"></label>
+          <input id="s-title" type="text" autocomplete="off">
+          <div class="s-row">
+            <div><label class="lab" for="s-a" id="s-l2"></label><input id="s-a" type="number" min="0" step="any" inputmode="decimal"></div>
+            <div><label class="lab" for="s-b" id="s-l3"></label><input id="s-b" type="number" min="0" step="any" inputmode="decimal"></div>
+            <div class="w"><label class="lab" for="s-weak">ចំណុចខ្សោយ (ជម្រើស)</label><input id="s-weak" type="text" placeholder="ឧ. ភ្លេចដូរសញ្ញា" autocomplete="off"></div>
+          </div>
+          <div class="s-msg" id="s-msg"></div>
+          <div><button class="btn green" id="s-save" style="min-width:140px">រក្សាទុក</button><span class="s-ok" id="s-ok"></span></div>
+        </div>
+
+        <div class="scard noprint">
+          <div class="s-head"><h2 style="font-size:17px">កំណត់ត្រាថ្មីៗ</h2><button class="btn" id="s-refresh" type="button">⟳ Refresh</button></div>
+          <div id="s-log"></div>
+        </div>
+
+        <div class="scard noprint">
+          <div class="s-head"><h2 style="font-size:17px">របាយការណ៍សិក្សាប្រចាំខែ</h2><span class="s-sub">សម្រាប់ផ្ញើអាណាព្យាបាល</span></div>
+          <div class="s-ctl">
+            <select id="sr-stu"></select>
+            <select id="sr-month"></select>
+            <label><input type="checkbox" id="sr-detail" checked> បញ្ជីលម្អិត</label>
+            <button class="btn" id="sr-img" type="button">Save Image</button>
+            <button class="btn dark" id="sr-print" type="button">Print / PDF</button>
+          </div>
+        </div>
+
+        <div id="srep"></div>
       </div>
 
       <div id="report" class="hidden">
@@ -425,7 +526,7 @@ const getToken = () => {
   return Number(t.split('.')[0]) > Date.now() ? t : '';
 };
 function logout(msg) {
-  sessionStorage.removeItem(CFG.TOKEN_KEY); rpt.loaded = false; rpt.list = []; setMode(false);
+  sessionStorage.removeItem(CFG.TOKEN_KEY); rpt.loaded = false; rpt.list = []; sl.loaded = false; sl.entries = []; sl.added = {}; sl.removed = {}; setMode(false);
   $('#app').classList.add('hidden'); $('#login').classList.remove('hidden');
   $('#p').value = '';
   const err = $('#login-err');
@@ -728,12 +829,16 @@ function parseDMY(s) {
 }
 function inMonth(i, y, m) { const d = parseDMY(i.date); return d && d.y === y && d.m === m; }
 
-function setMode(report) {
-  document.body.classList.toggle('report-mode', report);
-  $('#invoice').classList.toggle('hidden', report);
-  $('#report').classList.toggle('hidden', !report);
-  if (!report) syncLogo();
+function setView(v) {
+  document.body.classList.toggle('report-mode', v === 'report');
+  document.body.classList.toggle('study-mode', v === 'study');
+  $('#invoice').classList.toggle('hidden', v !== 'invoice');
+  $('#report').classList.toggle('hidden', v !== 'report');
+  $('#study').classList.toggle('hidden', v !== 'study');
+  if (v === 'invoice') syncLogo();
+  window.scrollTo(0, 0);
 }
+const setMode = report => setView(report ? 'report' : 'invoice');
 async function loadReport() {
   const b = $('#r-refresh'); b.disabled = true; b.textContent = 'Loading...';
   try {
@@ -836,6 +941,189 @@ $('#r-body').addEventListener('click', e => {
 $('#r-allpaid').addEventListener('click', () => {
   const todo = rpt.list.filter(i => inMonth(i, rpt.year, rpt.month) && !i.paid);
   if (todo.length && confirm('កត់ត្រាថា Paid ទាំង ' + todo.length + ' វិក្កយបត្រក្នុងខែនេះ?')) setPaid(todo, true);
+});
+
+/* ================= STUDY LOG + MONTHLY STUDY REPORT ================= */
+const SUBJECTS = ['គណិត', 'រូប', 'គីមី', 'ខ្មែរ', 'ជីវ'];
+const sl = { entries: [], loaded: false, student: '', subject: '', type: 'L', saving: false, added: {}, removed: {}, rs: '', rm: '' };
+const sid = () => 'S-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+const hasNum = e => e.a !== null && e.b !== null && e.b > 0;
+const mkey = d => d.y + '-' + String(d.m).padStart(2, '0');
+function dkey(s) { const d = parseDMY(s); return d ? d.y * 10000 + d.m * 100 + d.d : 0; }
+
+function studyNames() {
+  const names = [];
+  (state.students || []).forEach(x => { if (x.name && names.indexOf(x.name) < 0) names.push(x.name); });
+  sl.entries.forEach(x => { if (x.student && names.indexOf(x.student) < 0) names.push(x.student); });
+  if (sl.student && names.indexOf(sl.student) < 0) names.push(sl.student);
+  return names;
+}
+function renderStudyForm() {
+  const names = studyNames();
+  $('#s-stu').innerHTML = names.length
+    ? names.map(n => '<button type="button" class="chp' + (n === sl.student ? ' on' : '') + '" data-stu="' + esc(n) + '">' + esc(n) + '</button>').join('')
+    : '<span class="s-sub">មិនទាន់មានឈ្មោះសិស្ស — វាយឈ្មោះខាងក្រោម ឬចុច Sync Data ក្នុងទំព័រវិក្កយបត្រ</span>';
+  $('#s-subj').innerHTML = SUBJECTS.map(n => '<button type="button" class="chp' + (n === sl.subject ? ' on' : '') + '" data-sub="' + n + '">' + n + '</button>').join('');
+  $('#s-type').innerHTML = [['L', 'មេរៀន'], ['E', 'វិញ្ញាសា']].map(x => '<button type="button" class="chp' + (x[0] === sl.type ? ' on' : '') + '" data-type="' + x[0] + '">' + x[1] + '</button>').join('');
+  const L = sl.type === 'L';
+  $('#s-l1').textContent = L ? 'មេរៀនថ្ងៃនេះ' : 'ឈ្មោះវិញ្ញាសា';
+  $('#s-title').placeholder = L ? 'ឧ. សមីការដឺក្រេទី២' : 'ឧ. វិញ្ញាសាទី ៣';
+  $('#s-l2').textContent = L ? 'លំហាត់ធ្វើបាន' : 'ពិន្ទុបាន';
+  $('#s-l3').textContent = L ? 'លំហាត់ដែលឲ្យ' : 'ពិន្ទុពេញ';
+  $('#s-today').textContent = 'ថ្ងៃនេះ ' + today;
+}
+function renderStudyLog() {
+  const list = sl.entries.slice().reverse().slice(0, 12);
+  $('#s-log').innerHTML = list.length ? list.map(e =>
+    '<div class="sli"><div class="a"><b>' + esc(e.student) + '</b> · ' + esc(e.subject) + ' · ' + esc(e.title) +
+    '<br><small>' + esc(e.date) + ' · ' + (e.type === 'E' ? 'វិញ្ញាសា' : 'មេរៀន') + (e.weak ? ' · ខ្សោយ៖ ' + esc(e.weak) : '') + '</small></div>' +
+    '<div class="n">' + (hasNum(e) ? e.a + '/' + e.b : '') + '</div>' +
+    '<button class="sdel" type="button" data-del="' + esc(e.id) + '" aria-label="លុប">×</button></div>').join('')
+    : '<div class="snone">មិនទាន់មានកំណត់ត្រា</div>';
+}
+function renderStudyReport() {
+  const names = []; sl.entries.forEach(e => { if (names.indexOf(e.student) < 0) names.push(e.student); });
+  if (names.indexOf(sl.rs) < 0) sl.rs = (sl.student && names.indexOf(sl.student) >= 0) ? sl.student : (sl.entries.length ? sl.entries.slice().sort((x, y) => dkey(x.date) - dkey(y.date)).pop().student : '');
+  $('#sr-stu').innerHTML = names.length ? names.map(n => '<option' + (n === sl.rs ? ' selected' : '') + '>' + esc(n) + '</option>').join('') : '<option value="">(គ្មានសិស្ស)</option>';
+  const now = new Date(), cur = mkey({ y: now.getFullYear(), m: now.getMonth() + 1 });
+  const months = [cur];
+  sl.entries.forEach(e => { const d = parseDMY(e.date); if (d && months.indexOf(mkey(d)) < 0) months.push(mkey(d)); });
+  months.sort().reverse();
+  if (months.indexOf(sl.rm) < 0) sl.rm = cur;
+  const mname = k => MONTHS[Number(k.slice(5)) - 1] + ' ' + k.slice(0, 4);
+  $('#sr-month').innerHTML = months.map(k => '<option value="' + k + '"' + (k === sl.rm ? ' selected' : '') + '>' + mname(k) + '</option>').join('');
+
+  const all = sl.entries.filter(e => { const d = parseDMY(e.date); return e.student === sl.rs && d && mkey(d) === sl.rm; })
+    .sort((a, b) => dkey(a.date) - dkey(b.date));
+  const keepNote = ($('#srep .sr-nt') && $('#srep').dataset.k === sl.rs + '|' + sl.rm) ? $('#srep .sr-nt').innerText : '';
+  const box = $('#srep'); box.dataset.k = sl.rs + '|' + sl.rm;
+  const head = '<div class="sr-hd"><div><h2>របាយការណ៍សិក្សាប្រចាំខែ</h2><div><b style="font-size:17px">' + esc(sl.rs || '—') + '</b> · ' + mname(sl.rm) + '</div></div><img src="logo.png" alt=""></div>';
+  const foot = '<div class="sr-ft"><span>EDU-ikh | Home &amp; Online Tutoring · www.edu-ikh.com</span><span>' + today + '</span></div>';
+  if (!all.length) { box.innerHTML = head + '<div class="snone">មិនមានកំណត់ត្រាសម្រាប់សិស្សនេះក្នុងខែនេះទេ</div>' + foot; return; }
+  const Ls = all.filter(e => e.type !== 'E' && hasNum(e)), Es = all.filter(e => e.type === 'E' && hasNum(e));
+  const dn = Ls.reduce((x, e) => x + e.a, 0), tt = Ls.reduce((x, e) => x + e.b, 0);
+  const days = {}; all.forEach(e => { days[e.date] = 1; });
+  const kp = '<div class="sr-kp">' +
+    '<div class="sr-k"><small>ថ្ងៃរៀន</small><b>' + Object.keys(days).length + '</b></div>' +
+    '<div class="sr-k"><small>លំហាត់ធ្វើបាន</small><b>' + (tt ? dn + '/' + tt : '—') + '</b></div>' +
+    '<div class="sr-k"><small>វិញ្ញាសាបានធ្វើ</small><b>' + (Es.length || '—') + '</b></div>' +
+    '<div class="sr-k"><small>ពិន្ទុវិញ្ញាសាមធ្យម</small><b>' + (Es.length ? Math.round(Es.reduce((x, e) => x + pct(e.a, e.b), 0) / Es.length) + '%' : '—') + '</b></div></div>';
+  const subs = SUBJECTS.slice(); all.forEach(e => { if (subs.indexOf(e.subject) < 0) subs.push(e.subject); });
+  const detail = $('#sr-detail').checked;
+  const body = subs.filter(s => all.some(e => e.subject === s)).map(s => {
+    const l = all.filter(e => e.subject === s), ls = l.filter(e => e.type !== 'E'), ex = l.filter(e => e.type === 'E' && hasNum(e));
+    const lsn = ls.filter(hasNum), a = lsn.reduce((x, e) => x + e.a, 0), b = lsn.reduce((x, e) => x + e.b, 0);
+    const f = {}; l.forEach(e => { if (e.weak) f[e.weak] = (f[e.weak] || 0) + 1; });
+    const wk = Object.keys(f).sort((p, q) => f[q] - f[p]).slice(0, 2).join(', ');
+    let res = '';
+    if (ex.length === 1) res = esc(ex[0].title) + ' ' + pct(ex[0].a, ex[0].b) + '%';
+    if (ex.length > 1) res = pct(ex[0].a, ex[0].b) + '% → ' + pct(ex[ex.length - 1].a, ex[ex.length - 1].b) + '% (' + ex.length + ' វិញ្ញាសា)';
+    let h = '<div class="sr-sj"><div class="sr-sh"><span>' + esc(s) + '</span><span>' + l.length + ' ដង</span></div><div class="sr-bd">';
+    if (res) h += '<div class="sr-r"><span>លទ្ធផល</span><div>' + res + '</div></div>';
+    if (wk) h += '<div class="sr-r"><span>ចំណុចខ្សោយ</span><div>' + esc(wk) + '</div></div>';
+    if (b) h += '<div class="sr-r"><span>លំហាត់ដែលធ្វើបាន</span><div>' + a + '/' + b + ' (' + pct(a, b) + '%)<div class="sr-bar"><i style="width:' + pct(a, b) + '%"></i></div></div></div>';
+    if (ls.length) h += '<div class="sr-r"><span>មេរៀនកំពុងរៀន</span><div>' + esc(ls[ls.length - 1].title) + '</div></div>';
+    if (detail) h += '<div class="sr-lg">' + l.map(e => '<div><span>' + esc(e.date) + '</span><span>' + (e.type === 'E' ? 'វិញ្ញាសា' : 'មេរៀន') + '</span><span>' + esc(e.title) + '</span><span>' + (hasNum(e) ? e.a + '/' + e.b : '') + '</span></div>').join('') + '</div>';
+    return h + '</div></div>';
+  }).join('');
+  box.innerHTML = head + kp + body + '<div class="sr-nl">ចំណាំគ្រូ</div><div class="sr-nt" contenteditable spellcheck="false" data-ph="សរសេរ ១-២ ប្រយោគ (ជម្រើស)"></div>' + foot;
+  if (keepNote.trim()) $('#srep .sr-nt').innerText = keepNote;
+}
+function renderStudy() { renderStudyForm(); renderStudyLog(); renderStudyReport(); }
+async function loadStudy() {
+  const b = $('#s-refresh'); b.disabled = true;
+  try {
+    const d = await remote('action=study');
+    if (!d || !Array.isArray(d.entries)) throw new Error('deploy the new Apps Script');
+    const nowT = Date.now();
+    [sl.added, sl.removed].forEach(o => Object.keys(o).forEach(k => { if (nowT - o[k].t > 30000) delete o[k]; }));
+    let L = d.entries.filter(e => !sl.removed[e.id]);       // writes take a moment to show up in the sheet
+    Object.keys(sl.added).forEach(k => { if (!L.some(e => e.id === k)) L.push(sl.added[k].v); });
+    sl.entries = L; sl.loaded = true;
+  } catch (e) {
+    console.error(e);
+    if (String(e.message) !== 'unauthorized') toast('bad', 'ទាញកំណត់ត្រាមិនបាន — សូម Deploy Apps Script ជំនាន់ថ្មី (Anyone) រួចចុច Refresh', 6000);
+  } finally { b.disabled = false; }
+  renderStudy();
+}
+async function saveStudy() {
+  if (sl.saving) return;
+  const msg = $('#s-msg'), L = sl.type === 'L';
+  const name = (sl.student || $('#s-new').value).trim(), title = $('#s-title').value.trim();
+  const ra = $('#s-a').value.trim(), rb = $('#s-b').value.trim();
+  const a = ra === '' ? null : Number(ra), b = rb === '' ? null : Number(rb);
+  if (!name) { msg.textContent = 'ជ្រើសសិស្ស ឬវាយឈ្មោះសិស្ស'; return; }
+  if (!sl.subject) { msg.textContent = 'ជ្រើសមុខវិជ្ជា'; return; }
+  if (!title) { msg.textContent = L ? 'បញ្ចូលមេរៀនថ្ងៃនេះ' : 'បញ្ចូលឈ្មោះវិញ្ញាសា'; $('#s-title').focus(); return; }
+  if (!L && (a === null || b === null)) { msg.textContent = 'វិញ្ញាសាត្រូវការពិន្ទុបាន និងពិន្ទុពេញ'; return; }
+  if ((a === null) !== (b === null)) { msg.textContent = 'បញ្ចូលលេខទាំងពីរ ឬទុកទទេទាំងពីរ'; return; }
+  if (a !== null && (!(a >= 0) || !(b > 0))) { msg.textContent = 'លេខមិនត្រឹមត្រូវ (លេខទីពីរត្រូវធំជាងសូន្យ)'; return; }
+  if (a !== null && a > b) { msg.textContent = L ? 'លំហាត់ធ្វើបានមិនអាចច្រើនជាងលំហាត់ដែលឲ្យ' : 'ពិន្ទុបានមិនអាចច្រើនជាងពិន្ទុពេញ'; return; }
+  msg.textContent = ''; sl.saving = true;
+  const btn = $('#s-save'); btn.disabled = true; btn.textContent = 'Saving...';
+  const entry = { id: sid(), date: today, student: name, subject: sl.subject, type: sl.type, title: title, a: a, b: b, weak: $('#s-weak').value.trim() };
+  try {
+    await post({ action: 'saveStudy', entry: entry });
+    sl.entries.push(entry); sl.added[entry.id] = { t: Date.now(), v: entry };
+    sl.student = name; sl.rs = name;
+    ['#s-new', '#s-title', '#s-a', '#s-b', '#s-weak'].forEach(q => { $(q).value = ''; });
+    $('#s-ok').textContent = 'បានរក្សាទុក ' + name + ' · ' + sl.subject;
+    renderStudy();
+    setTimeout(loadStudy, 2500);
+  } catch (e) { if (String(e.message) !== 'unauthorized') msg.textContent = 'រក្សាទុកមិនបាន សូមព្យាយាមម្តងទៀត'; }
+  finally { sl.saving = false; btn.disabled = false; btn.textContent = 'រក្សាទុក'; }
+}
+async function deleteStudy(id) {
+  const e = sl.entries.find(x => x.id === id); if (!e) return;
+  if (!confirm('លុបកំណត់ត្រានេះ?\n' + e.student + ' · ' + e.subject + ' · ' + e.title)) return;
+  sl.entries = sl.entries.filter(x => x.id !== id); sl.removed[id] = { t: Date.now() }; delete sl.added[id];
+  renderStudy();
+  try { await post({ action: 'deleteStudy', id: id }); setTimeout(loadStudy, 2500); }
+  catch (x) { if (String(x.message) !== 'unauthorized') toast('bad', 'លុបមិនបាន សូមព្យាយាមម្តងទៀត'); delete sl.removed[id]; loadStudy(); }
+}
+const clearStudyMsg = () => { $('#s-msg').textContent = ''; $('#s-ok').textContent = ''; };
+$('#b-study').addEventListener('click', () => { setView('study'); renderStudy(); if (!sl.loaded) loadStudy(); });
+$('#s-refresh').addEventListener('click', loadStudy);
+$('#s-save').addEventListener('click', saveStudy);
+$('#s-stu').addEventListener('click', e => {
+  const b = e.target.closest('[data-stu]'); if (!b) return;
+  sl.student = b.dataset.stu; $('#s-new').value = '';
+  for (let i = sl.entries.length - 1; i >= 0; i--) if (sl.entries[i].student === sl.student) {   // same subject/type as last time
+    if (SUBJECTS.indexOf(sl.entries[i].subject) >= 0) sl.subject = sl.entries[i].subject;
+    sl.type = sl.entries[i].type === 'E' ? 'E' : 'L'; break;
+  }
+  clearStudyMsg(); renderStudyForm();
+});
+$('#s-new').addEventListener('input', () => { if ($('#s-new').value) { sl.student = ''; renderStudyForm(); } $('#s-msg').textContent = ''; });
+$('#s-subj').addEventListener('click', e => { const b = e.target.closest('[data-sub]'); if (b) { sl.subject = b.dataset.sub; clearStudyMsg(); renderStudyForm(); } });
+$('#s-type').addEventListener('click', e => { const b = e.target.closest('[data-type]'); if (b) { sl.type = b.dataset.type; clearStudyMsg(); renderStudyForm(); } });
+['#s-title', '#s-a', '#s-b'].forEach(q => $(q).addEventListener('input', () => { $('#s-msg').textContent = ''; }));
+$('#s-log').addEventListener('click', e => { const b = e.target.closest('[data-del]'); if (b) deleteStudy(b.dataset.del); });
+$('#sr-stu').addEventListener('change', e => { sl.rs = e.target.value; renderStudyReport(); });
+$('#sr-month').addEventListener('change', e => { sl.rm = e.target.value; renderStudyReport(); });
+$('#sr-detail').addEventListener('change', renderStudyReport);
+$('#sr-print').addEventListener('click', () => {
+  const nt = $('#srep .sr-nt');
+  $('#srep').classList.toggle('pnonote', !nt || !nt.innerText.trim());
+  window.print();
+});
+$('#sr-img').addEventListener('click', async () => {
+  const btn = $('#sr-img'), el = $('#srep');
+  if (typeof html2canvas === 'undefined') { toast('bad', 'html2canvas មិនទាន់ load (សូមពិនិត្យអ៊ីនធឺណិត)'); return; }
+  btn.disabled = true; btn.textContent = 'Generating...';
+  const nt = $('#srep .sr-nt'), empty = !nt || !nt.innerText.trim();
+  try {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    el.classList.toggle('nonote', empty);
+    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, windowWidth: 1400,
+      onclone: doc => { const st = doc.createElement('style'); st.textContent = '#srep *{letter-spacing:normal!important}#srep{box-shadow:none!important}'; doc.head.appendChild(st); } });
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/jpeg', 0.92);
+    a.download = (sl.rs || 'student') + '-study-' + sl.rm + '.jpg';
+    a.click();
+  } catch (e) { toast('bad', 'Error generating image: ' + e.message, 4000); }
+  finally { el.classList.remove('nonote'); btn.disabled = false; btn.textContent = 'Save Image'; }
 });
 
 /* ===== logo height = height of the right column (title + details box) ===== */
