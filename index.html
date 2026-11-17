@@ -78,7 +78,15 @@ input,textarea,button{font-family:inherit}
 .stu h3{margin:0 0 8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#a8a29e}
 .stu .field{display:block;width:100%;text-align:left;font-size:24px;padding:10px;border-bottom:2px solid transparent}
 .stu #f-search{font-size:26px;padding:4px 10px 2px}
-.stu #f-addr{font-size:16px;font-weight:500;color:#57534e;padding:2px 10px 8px}
+.loc{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;padding:2px 10px 8px;font-size:16px;font-weight:500;color:#57534e}
+.pt{outline:none;border-radius:4px;padding:2px 4px;min-width:1ch;line-height:1.9;white-space:pre-wrap}
+.pt:empty::before{content:attr(data-ph);color:#a8a29e;font-weight:400}
+.pt:focus{outline:2px solid #a8a29e;background:#fafaf9}
+.pt.dot::after{content:'\00b7';margin:0 8px 0 12px;color:#a8a29e}
+.pt.tg{font-size:12px;font-weight:700;border:1px solid #d6d3d1;border-radius:11px;padding:0 10px;margin-left:12px;background:#fff;color:#111827;line-height:1.9}
+.ph{display:flex;align-items:center;padding-left:10px}
+.ph svg{flex:none;width:17px;height:17px;stroke:#78716c}
+.ph .field{padding-left:8px!important}
 .stu #f-phone{font-size:17px;padding:2px 10px 4px}
 .stu .field:hover{border-bottom-color:#e7e5e4}
 .search{position:relative}
@@ -229,7 +237,8 @@ body:not(.report-mode):not(.study-mode) .rpt-only{display:none!important}
   .stu{padding:12px;margin-bottom:18px}
   .stu .field{font-size:20px;padding:10px 6px}
   .stu #f-search{font-size:22px;padding:4px 6px 2px}
-  .stu #f-addr{font-size:14px;padding:2px 6px 6px}
+  .loc{font-size:14px;padding:2px 6px 6px}
+  .ph{padding-left:6px}
   .stu #f-phone{font-size:16px;padding:2px 6px 4px}
 
   .tw{border:none;overflow:visible}
@@ -297,6 +306,8 @@ body:not(.report-mode):not(.study-mode) .rpt-only{display:none!important}
   #report{position:absolute;left:0;top:0;width:210mm;box-shadow:none;padding:10mm}
   #invoice{position:absolute;left:0;top:0;width:210mm;min-height:297mm;box-shadow:none;padding:10mm;font-size:11pt}
   .noprint,[data-noprint]{display:none!important}
+  .pt:empty{display:none!important}
+  .pt:focus{outline:none!important;background:transparent!important}
   .field,td input,.tbox .disc input{border:none!important;background:transparent!important}
   .tbox .disc input{color:#f87171!important}
   .foot,table,tr{page-break-inside:avoid}
@@ -368,8 +379,13 @@ body:not(.report-mode):not(.study-mode) .rpt-only{display:none!important}
             <input class="field" id="f-search" placeholder="🔍 Search Student Name..." autocomplete="off">
             <div id="dropdown" class="hidden noprint" data-html2canvas-ignore="true"></div>
           </div>
-          <input class="field" id="f-addr" placeholder="Student Location">
-          <input class="field" id="f-phone" placeholder="Phone Number">
+          <div class="loc" id="f-loc">
+            <span class="pt" id="l-a" contenteditable="plaintext-only" spellcheck="false" data-ph="ថ្នាក់"></span>
+            <span class="pt" id="l-b" contenteditable="plaintext-only" spellcheck="false" data-ph="ទីតាំង"></span>
+            <span class="pt" id="l-c" contenteditable="plaintext-only" spellcheck="false" data-ph="មុខវិជ្ជា"></span>
+            <span class="pt tg" id="l-t" contenteditable="plaintext-only" spellcheck="false" data-ph="1-to 1"></span>
+          </div>
+          <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><input class="field" id="f-phone" placeholder="Phone Number"></div>
         </div>
 
         <div>
@@ -714,8 +730,30 @@ function renderItems() {
     </tr>`).join('');
   renderTotals();
 }
+/* Location string "grade | place | subject (1-to 1)" <-> 3 parts + tag (the sheet keeps the single string) */
+function splitLoc(str) {
+  let t = '', x = String(str || '').trim();
+  const m = x.match(/\(([^()]*)\)\s*$/);
+  if (m) { t = m[1].trim(); x = x.slice(0, m.index).trim(); }
+  const p = x.split(/\s*[|\u00b7]\s*/).map(v => v.trim()).filter(Boolean);
+  return { a: p[0] || '', b: p[1] || '', c: p.slice(2).join(' | '), t: t };
+}
+function joinLoc() {
+  const v = id => $('#' + id).textContent.replace(/[\r\n|]+/g, ' ').trim();
+  const t = v('l-t'), base = [v('l-a'), v('l-b'), v('l-c')].filter(Boolean).join(' | ');
+  return base + (t ? (base ? ' ' : '') + '(' + t + ')' : '');
+}
+function locDots() {
+  const ids = ['l-a', 'l-b', 'l-c'];
+  ids.forEach((id, k) => $('#' + id).classList.toggle('dot', ids.slice(k + 1).some(j => $('#' + j).textContent.trim() !== '') && $('#' + id).textContent.trim() !== ''));
+}
+$$('#f-loc .pt').forEach(el => {
+  el.addEventListener('input', () => { state.addr = joinLoc(); locDots(); });
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+});
 function renderStudentFields() {
-  $('#f-search').value = state.name; $('#f-addr').value = state.addr; $('#f-phone').value = state.phone;
+  $('#f-search').value = state.name; $('#f-phone').value = state.phone;
+  const L = splitLoc(state.addr); $('#l-a').textContent = L.a; $('#l-b').textContent = L.b; $('#l-c').textContent = L.c; $('#l-t').textContent = L.t; locDots();
 }
 function renderAll() {
   $('#f-num').value = state.number; $('#f-date').value = state.date; $('#f-vs').value = state.vs; $('#f-due').value = state.due;
@@ -748,7 +786,7 @@ $('#b-add').addEventListener('click', () => {
 });
 
 /* header fields */
-[['f-date','date'],['f-vs','vs'],['f-due','due'],['f-addr','addr'],['f-phone','phone']].forEach(([id,k]) =>
+[['f-date','date'],['f-vs','vs'],['f-due','due'],['f-phone','phone']].forEach(([id,k]) =>
   $('#' + id).addEventListener('input', e => { state[k] = e.target.value; }));
 $('#f-disc').addEventListener('input', e => {
   let v = Math.min(100, Math.max(0, Number(e.target.value) || 0));
@@ -826,7 +864,7 @@ $('#b-img').addEventListener('click', async () => {
         const st = doc.createElement('style');
         st.textContent = '#invoice *{letter-spacing:normal!important}' +
           '#invoice .box,#invoice td .amt{line-height:1.9!important}' +
-          '#invoice td,#invoice .box,#invoice .stu{overflow:visible!important}';
+          '#invoice td,#invoice .box,#invoice .stu{overflow:visible!important}#invoice .pt:empty{display:none!important}';
         doc.head.appendChild(st);
         doc.querySelectorAll('#invoice input').forEach(inp => {
           if (inp.classList.contains('dp') || inp.closest('[data-html2canvas-ignore]')) return;
