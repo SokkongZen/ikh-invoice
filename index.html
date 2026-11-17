@@ -1022,8 +1022,10 @@ function renderStudyReport() {
   (rpt.loaded ? rpt.list : sl.inv).forEach(i => {
     if (String(i.name || '').trim().toLowerCase() !== me || !me) return;
     const a = dkey(i.validityStart), z = dkey(i.dueDate); if (!a || !z || z < a) return;
-    const k = 'P:' + a + '|' + z; if (seen[k]) return; seen[k] = 1;
-    opts.push({ k: k, a: a, z: z, date: String(i.date || ''), label: i.validityStart + ' → ' + i.dueDate });
+    const k = 'P:' + a + '|' + z;
+    if (seen[k]) { if (i.date) seen[k].date = String(i.date); return; }      // same Validity twice for this student: keep the later sheet row's date
+    seen[k] = { k: k, a: a, z: z, date: String(i.date || ''), label: i.validityStart + ' → ' + i.dueDate };
+    opts.push(seen[k]);
   });
   opts.sort((x, y) => y.a - x.a);
   const months = [cur];
